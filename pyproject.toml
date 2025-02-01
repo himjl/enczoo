@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]  # Add build dependencies
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enczoo"
+version = "0.0.1"
+description = "A zoo of encoding models"
+authors = [
+    { name = "Michael J. Lee", email = "mil@mit.edu" }
+]
+license = { file = "license.md" }
+readme = "README.md"
+requires-python = ">=3.11"
+
+# Dependencies from requirements.txt
+dependencies = [
+    "pytest>=8.3",
+]
+
+[project.urls]
+repository = "https://github.com/himjl/enczoo"
+
+[tool.setuptools.packages.find]
+where = ["."]
+namespaces = false
