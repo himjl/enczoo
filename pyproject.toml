@@ -16,6 +16,8 @@ requires-python = ">=3.11"
 # Dependencies from requirements.txt
 dependencies = [
     "pytest>=8.3",
+    "pillow>=10.4",
+    "pydantic>=2.10",
 ]
 
 [project.urls]
