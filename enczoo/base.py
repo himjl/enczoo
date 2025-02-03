@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Tuple
 
 import PIL.Image
 import torch
@@ -23,13 +23,19 @@ class ImageEncoding(
         Just an alias for __call__, to allow for type hinting by IDEs
         (PyCharm does not recognize __call__ signature of torch.nn.Modules, for some reason).
         :param images: a B length list of PIL.Images.
+        :param flatten: if True, flattens the output tensor to [B, d].
         :return: a torch.Tensor of shape [B, *]. If flatten=True, returns [B, d] instead.
         """
         return self(images=images, flatten=flatten)
 
-    def forward(self, images: List[PIL.Image], flatten: bool = True) -> torch.Tensor:
+    def forward(
+            self,
+            images: List[PIL.Image],
+            flatten: bool = True
+    ) -> torch.Tensor:
         """
         :param images: a B length list of PIL.Images.
+        :param flatten: if True, flattens the output tensor to [B, d].
         :return: a torch.Tensor of shape [B, *]
         """
         if not isinstance(images, list):

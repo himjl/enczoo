@@ -10,7 +10,7 @@ from enczoo.base import ImageEncoding
 # %%
 class Pixels(ImageEncoding):
     """
-    This ImageEncoding simply takes the center crop of an image and resizes it to size x size.
+    This ImageEncoding simply takes the center crop of an image and resizes it to (size x size).
     """
 
     def __init__(self, size: int = 16):

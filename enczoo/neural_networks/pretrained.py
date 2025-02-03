@@ -60,6 +60,10 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
         image_loader, model = self._load_modules()
 
+        # Ensure modules are in evaluation mode
+        image_loader.train(mode=False)
+        model.train(mode=False)
+
         super().__init__(
             image_loader=image_loader,
             model=model,
@@ -68,11 +72,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             random_projection_seed=random_projection_seed,
         )
 
-        # Force the model to be in evaluation mode
+        # Ensure the model is in evaluation mode
         self.train(mode=False)
-        self.image_loader.train(mode=False)
-        self.model.train(mode=False)
-
         assert self.model.training is False
         assert self.image_loader.training is False
         assert self.training is False
