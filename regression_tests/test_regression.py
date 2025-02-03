@@ -6,8 +6,9 @@ import pytest
 import numpy as np
 import json
 
-
 _dir = Path(__file__).parent
+
+
 @pytest.fixture
 def test_images() -> List[PIL.Image]:
     imagesdir = _dir / 'test_images'
@@ -27,9 +28,10 @@ def test_target() -> np.ndarray:
     x = np.array(x)
     return x
 
+
 def test_alexnet_regresses(test_images, test_target):
     enc = enczoo.AlexNet(
-        layer_name = enczoo.AlexNet.layer_names[-2],
+        layer_name=enczoo.AlexNet.layer_names[-2],
         random_projection_dim=None,
         random_projection_seed=0
     )
