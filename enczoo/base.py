@@ -4,6 +4,7 @@ from typing import List
 import PIL.Image
 import torch
 
+
 # %%
 class ImageEncoding(
     torch.nn.Module,
@@ -13,16 +14,20 @@ class ImageEncoding(
     torch.nn.Module which represents a fixed mapping from B-length lists of PIL.Images to [B, *] float tensors.
     """
 
-    def compute_features(self, images: List[PIL.Image]) -> torch.Tensor:
+    def compute_features(
+            self,
+            images: List[PIL.Image],
+            flatten: bool = True
+    ) -> torch.Tensor:
         """
         Just an alias for __call__, to allow for type hinting by IDEs
         (PyCharm does not recognize __call__ signature of torch.nn.Modules, for some reason).
         :param images: a B length list of PIL.Images.
-        :return: a torch.Tensor of shape [B, *]
+        :return: a torch.Tensor of shape [B, *]. If flatten=True, returns [B, d] instead.
         """
-        return self(images=images)
+        return self(images=images, flatten=flatten)
 
-    def forward(self, images: List[PIL.Image]) -> torch.Tensor:
+    def forward(self, images: List[PIL.Image], flatten: bool = True) -> torch.Tensor:
         """
         :param images: a B length list of PIL.Images.
         :return: a torch.Tensor of shape [B, *]
@@ -35,7 +40,13 @@ class ImageEncoding(
             raise ValueError('Expected a non-empty list of PIL.Images.')
 
         # Call the subclass implementation
-        return self._images_to_features(images=images)
+        feat = self._images_to_features(images=images)
+
+        if flatten:
+            # Flatten the features
+            feat = feat.reshape(feat.shape[0], -1)
+
+        return feat
 
     @abstractmethod
     def _images_to_features(self, images: List[PIL.Image]) -> torch.Tensor:

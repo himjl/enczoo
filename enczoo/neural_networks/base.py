@@ -29,7 +29,6 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         self.register_buffer('layer_name', torch.tensor([ord(c) for c in layer_name], dtype=torch.int16))
         self._layer_name = layer_name  # Needed for the forward pass
 
-
         def register_hook(
                 module: torch.nn.Module,
                 root_name: str,
@@ -51,9 +50,7 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
                     raise ValueError('Empty module name found in model!')
 
                 # Recursive call:
-                print('S:', next_root_name)
                 submodule_names = register_hook(submodule, root_name=next_root_name, activations_dict=activations_dict)
-                print('E:', next_root_name, '\n')
 
                 # Update the number of children
                 nchildren += 1
