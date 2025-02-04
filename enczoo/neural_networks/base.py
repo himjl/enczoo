@@ -8,7 +8,10 @@ import torchvision
 from enczoo.transforms.random_projection import RandomProjection
 
 
-class ImageNeuralNetwork(ImageEncoding, ABC):
+class ImageNeuralNetwork(
+    ImageEncoding,
+    ABC,
+):
     def __init__(
             self,
             image_loader: Union[torch.nn.Module, torchvision.transforms.Compose],

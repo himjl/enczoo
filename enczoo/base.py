@@ -8,7 +8,7 @@ import torch
 # %%
 class ImageEncoding(
     torch.nn.Module,
-    ABC
+    ABC,
 ):
     """
     torch.nn.Module which represents a fixed mapping from B-length lists of PIL.Images to [B, *] float tensors.
