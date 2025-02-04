@@ -15,7 +15,6 @@ def alexnet():
         random_projection_seed=0
     )
 
-
 @pytest.fixture
 def images() -> List[PIL.Image.Image]:
     np.random.seed(0)
