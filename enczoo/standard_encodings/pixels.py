@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import PIL.Image
 import torch
@@ -16,7 +16,10 @@ class Pixels(ImageEncoding):
     def __init__(self, size: int = 16):
         super().__init__()
 
-        self.size = torch.tensor(size, dtype=torch.int16, requires_grad=False)
+        # Register size tensor as buffer
+        self.register_buffer('size', torch.tensor(size, dtype=torch.int16, requires_grad=False))
+
+        # Transform
         self.transforms = v2.Compose(
             [
                 v2.ToImage(),
@@ -40,3 +43,10 @@ class Pixels(ImageEncoding):
 
         return images_tensor
 
+    def output_shape(self) -> Tuple[int, ...]:
+        return (self.size.item(), self.size.item(), 3)
+
+
+if __name__ == '__main__':
+    x = Pixels()
+    print(x.output_shape())
