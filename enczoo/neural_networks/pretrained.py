@@ -134,10 +134,6 @@ class ResNet50(_PretrainedNN):
         return image_loader, model
 
 
-class AtResNet50(ResNet50):
-    pass
-
-
 if __name__ == '__main__':
     resnet50 = ResNet50(
         layer_name='avgpool',
