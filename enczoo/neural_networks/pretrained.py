@@ -1,15 +1,12 @@
-from enczoo.neural_networks.base import ImageNeuralNetwork
-import torch
-import torchvision.transforms.v2 as v2
-from typing import Literal, Union, Dict, List, Tuple, Callable
-import numpy as np
+from abc import ABC, abstractmethod
+from typing import Union, List, Tuple
 
-import warnings
 import PIL.Image
+import torch
 import torchvision.models
 import torchvision.transforms.functional as F
 
-from abc import ABC, abstractmethod
+from enczoo.neural_networks.base import ImageNeuralNetwork
 
 
 class StandardImageLoader(torch.nn.Module):
@@ -52,8 +49,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
     def __init__(
             self,
             layer_name: str,
-            random_projection_dim: Union[int, None],
-            random_projection_seed: int,
+            random_projection_dim: Union[int, None] = None,
+            random_projection_seed: Union[int, None] = None,
     ):
         if layer_name not in self.layer_names:
             raise ValueError(f'Unknown layer_name: {layer_name}. Available:\n{self.layer_names}')
@@ -139,7 +136,6 @@ class AtResNet50(ResNet50):
 
 
 if __name__ == '__main__':
-
     resnet50 = ResNet50(
         layer_name='avgpool',
         random_projection_dim=None,

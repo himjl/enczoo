@@ -15,7 +15,7 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
             model: torch.nn.Module,
             layer_name: str,
             random_projection_dim: Union[int, None],
-            random_projection_seed: int,
+            random_projection_seed: Union[int, None],
     ):
         super().__init__()
 
@@ -94,6 +94,8 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         self.model = model
 
         if random_projection_dim is not None:
+            if random_projection_seed is None:
+                raise ValueError('random_projection_seed must be provided if random_projection_dim is not None!')
             self.random_projection = RandomProjection(
                 seed=random_projection_seed,
                 in_features=int(np.prod(self._layer_to_shape[layer_name])),
