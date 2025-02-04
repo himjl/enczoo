@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     paths:
-      # Changes to alignment source code
       - enczoo/**
-      # Changes to workflows
+      - regression_tests/**
+      - pyproject.toml
       - .github/workflows/ci.yml
 jobs:
   unit_tests:
