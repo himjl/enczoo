@@ -10,7 +10,7 @@ from enczoo.transforms.random_projection import RandomProjection
 
 class ImageNeuralNetwork(
     ImageEncoding,
-    ABC,
+    ABC
 ):
     def __init__(
             self,
