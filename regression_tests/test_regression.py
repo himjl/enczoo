@@ -18,20 +18,16 @@ def test_images() -> List[PIL.Image]:
             img = img.convert("RGB")
             images.append(img.copy())
 
-    assert len(images) == 1
+    assert len(images) == 5
     return images
 
 
-@pytest.fixture
-def test_target() -> np.ndarray:
-    x = json.loads((_dir / 'test_targets' / 'alexnet_target.json').read_text())
-    x = np.array(x)
-    return x
+def test_alexnet_regresses(test_images):
+    # Spot checks the penultimate layer of AlexNet
+    test_target = np.load(_dir / 'test_targets'/ 'target_alexnet_classifier5.npy')
 
-
-def test_alexnet_regresses(test_images, test_target):
     enc = enczoo.AlexNet(
-        layer_name=enczoo.AlexNet.layer_names[-2],
+        layer_name='classifier.5',
         random_projection_dim=None,
         random_projection_seed=0
     )
@@ -40,5 +36,27 @@ def test_alexnet_regresses(test_images, test_target):
         images=test_images,
     )
 
-    result = result.detach().cpu().numpy()[0]
+    result = result.detach().cpu().numpy()
+    assert result.shape == test_target.shape
     assert np.allclose(result, test_target, atol=1e-3)
+
+
+def test_rn50_regresses(test_images):
+    # Spot checks the penultimate layer of ResNet50
+
+    test_target = np.load(_dir / 'test_targets'/ 'target_rn50_avgpool.npy')
+
+    enc = enczoo.ResNet50(
+        layer_name='avgpool',
+        random_projection_dim=None,
+        random_projection_seed=0
+    )
+
+    result = enc.compute_features(
+        images=test_images,
+    )
+
+    result = result.detach().cpu().numpy()
+    assert result.shape == test_target.shape
+    assert np.allclose(result, test_target, atol=1e-3)
+

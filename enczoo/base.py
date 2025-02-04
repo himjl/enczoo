@@ -17,7 +17,7 @@ class ImageEncoding(
     def compute_features(
             self,
             images: List[PIL.Image],
-            flatten: bool = True
+            flatten: bool = False,
     ) -> torch.Tensor:
         """
         Just an alias for __call__, to allow for type hinting by IDEs
@@ -31,7 +31,7 @@ class ImageEncoding(
     def forward(
             self,
             images: List[PIL.Image],
-            flatten: bool = True
+            flatten: bool = False,
     ) -> torch.Tensor:
         """
         :param images: a B length list of PIL.Images.
