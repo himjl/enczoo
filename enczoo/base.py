@@ -60,4 +60,8 @@ class ImageEncoding(
         :param images: a B-length list of PIL.Images
         :return: a torch.Tensor of shape [B, *]
         """
-        raise NotImplementedError("Subclasses must implement this method.")
+        raise NotImplementedError
+
+    @abstractmethod
+    def output_shape(self) -> Tuple[int, ...]:
+        raise NotImplementedError

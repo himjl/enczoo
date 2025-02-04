@@ -26,40 +26,23 @@ def input_tensor() -> torch.Tensor:
                  -0.87079715, -0.57884966, -0.31155253, 0.05616534, -1.16514984,
                  0.90082649]
             ]
-        )
+        ),
+        dtype=torch.float
     )
 
 
-def test_determinism(input_tensor):
-    output_shape = 5
-
+def test_deterministic(input_tensor):
     mod = random_projection_layer.RandomProjection(
-        output_shape=output_shape,
+        in_features=input_tensor.shape[1],
+        out_features=2,
         seed=0,
     )
 
     y = mod(input_tensor)
 
     # Should be the same result across computers
-    assert torch.isclose(y[0, 0], torch.tensor(0.5358, dtype=y.dtype))
+    assert torch.isclose(y[0, 0], torch.tensor(0.8472, dtype=y.dtype), atol=1e-4)
 
     # Should be the same result across calls
     y2 = mod(input_tensor)
     assert torch.allclose(y, y2)
-
-
-def test_invariance_to_chunksize(input_tensor):
-    results = []
-    for chunk_size in [1, 2, 3, 100]:
-        mod = random_projection_layer.RandomProjection(
-            output_shape=2,
-            seed=0,
-            max_projection_floats=chunk_size
-        )
-
-        y = mod(input_tensor)
-        results.append(y)
-
-    # Should be the same result across chunk sizes
-    for i in range(1, len(results)):
-        assert torch.allclose(results[0], results[i])

@@ -19,12 +19,6 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
     ):
         super().__init__()
 
-        # Register modules
-        self.image_loader = image_loader
-        self.model = model
-        if random_projection_dim is not None:
-            self.random_projection = RandomProjection(seed=random_projection_seed, output_shape=random_projection_dim)
-
         # Register buffers to ensure the model's hash is distinctive for each layer
         self.register_buffer('layer_name', torch.tensor([ord(c) for c in layer_name], dtype=torch.int16))
         self._layer_name = layer_name  # Needed for the forward pass
@@ -86,13 +80,27 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         self.train(mode=False)
 
         # Populate the sizes of the layers with a forward pass
-        test_image = PIL.Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))
-        test_image = self.image_loader(test_image)
-        self.model(test_image.unsqueeze(0))
+        with torch.no_grad():
+            test_image = PIL.Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))
+            test_image = image_loader(test_image)
+            model(test_image.unsqueeze(0))
 
         self._layer_to_shape = {
             layer: tuple(self._hidden_activations[layer].shape[1:]) for layer in self._hidden_activations
         }
+
+        # Register modules
+        self.image_loader = image_loader
+        self.model = model
+
+        if random_projection_dim is not None:
+            self.random_projection = RandomProjection(
+                seed=random_projection_seed,
+                in_features=int(np.prod(self._layer_to_shape[layer_name])),
+                out_features=random_projection_dim
+            )
+        else:
+            self.random_projection = None
 
     def _images_to_features(self, images: List[PIL.Image]) -> torch.Tensor:
         """
@@ -110,7 +118,11 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         f = self._hidden_activations[self._layer_name]
 
         # Perform random projection if requested
-        if hasattr(self, 'random_projection'):
+        if self.random_projection is not None:
+            # Flatten the features
+            f = f.reshape(f.shape[0], -1)
+
+            # Run the random projection forward
             f = self.random_projection(f)
 
         return f
@@ -121,3 +133,10 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         :return: a dictionary mapping layer names to the number of features in the layer.
         """
         return self._layer_to_shape
+
+    @property
+    def output_shape(self) -> Tuple[int, ...]:
+        if self.random_projection is None:
+            return self._layer_to_shape[self._layer_name]
+        else:
+            return self.random_projection.output_shape

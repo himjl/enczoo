@@ -33,6 +33,9 @@ class RandomProjection(nn.Module):
             persistent=True,
         )
 
+        # Record the output features
+        self._out_features = out_features
+
         # Initialize the module
         self.linear = nn.Linear(
             in_features=in_features,
@@ -62,6 +65,9 @@ class RandomProjection(nn.Module):
     def __repr__(self):
         return f"RandomProjection(in_features={self.linear.weight.shape[1]}, out_features={self.linear.weight.shape[0]}, seed={self.seed})"
 
+    @property
+    def output_shape(self) -> Tuple[int]:
+        return (self._out_features,)
 
 # %%
 if __name__ == '__main__':
