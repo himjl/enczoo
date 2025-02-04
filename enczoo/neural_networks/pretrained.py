@@ -85,6 +85,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
 
 class AlexNet(_PretrainedNN):
+
+    # A subset of all layers (each separated by one nonlinearity):
     layer_names = [
         'features.1',
         'features.4',
@@ -103,6 +105,7 @@ class AlexNet(_PretrainedNN):
 
 
 class ResNet50(_PretrainedNN):
+    # A subset of layers (each separated by one nonlinearity, except layer4.2.relu, avgpool, and fc, which are connected by a linear layer):
     layer_names = [
         'relu',
         'layer1.0.relu',
