@@ -15,6 +15,8 @@ class StandardImageLoader(torch.nn.Module):
     variant does not necessarily "chop" the image margins. That is, this
     image loader results in the largest square sub-image (unlike the standard image loader, which returns a proportionally smaller sub-image).
 
+    It also coerces the image to RGB mode, if it is not already in that mode.
+
     See the ImageClassification torchvision.transforms._presents.py module for the original image loader.
 
     Example:
@@ -24,6 +26,9 @@ class StandardImageLoader(torch.nn.Module):
     """
 
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
+
+        img = img.convert('RGB')
+
         img = F.resize(
             img=img,
             size=[224],
