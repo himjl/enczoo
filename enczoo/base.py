@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
-
+from typing import List, Tuple, Union
+from pathlib import Path
 import PIL.Image
 import torch
+
+import mref
+import tensorbucket
+import enczoo.module_hash
 
 
 # %%
@@ -11,7 +15,7 @@ class ImageEncoding(
     ABC,
 ):
     """
-    torch.nn.Module which represents a fixed mapping from B-length lists of PIL.Images to [B, *] float tensors.
+    torch.nn.Module which executes a fixed mapping from B-length lists of PIL.Images to [B, *] float tensors.
     """
 
     def compute_features(
@@ -40,10 +44,10 @@ class ImageEncoding(
         """
         if not isinstance(images, list):
             raise ValueError(f'Expected a list of PIL.Images, but got {type(images)}')
-        if not isinstance(images[0], PIL.Image.Image):
-            raise ValueError(f'Expected a list of PIL.Images, but element 0 is a {type(images[0])}')
         if len(images) == 0:
             raise ValueError('Expected a non-empty list of PIL.Images.')
+        if not isinstance(images[0], PIL.Image.Image):
+            raise ValueError(f'Expected a list of PIL.Images, but element 0 is a {type(images[0])}')
 
         # Call the subclass implementation
         feat = self._images_to_features(images=images)

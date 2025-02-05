@@ -45,7 +45,6 @@ class RandomProjection(nn.Module):
         # Turn off gradient tracking
         self.linear.requires_grad_(requires_grad=False)
 
-
         # Set the weights from a standard normal distribution
         gen = torch.Generator()
         gen.manual_seed(seed)
@@ -68,6 +67,7 @@ class RandomProjection(nn.Module):
     @property
     def output_shape(self) -> Tuple[int]:
         return (self._out_features,)
+
 
 # %%
 if __name__ == '__main__':
