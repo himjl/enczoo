@@ -53,9 +53,9 @@ class ImageEncoding(
         return self._output_shape
 
     @property
-    def module_hash(self) -> Union[str, None]:
+    def module_hash(self) -> str:
         if self.config.trainable:
-            return None
+            raise ValueError('Cannot hash a trainable model.')
 
         # Turn off gradients for all parameters
         for param in self.parameters():
