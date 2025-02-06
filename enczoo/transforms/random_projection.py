@@ -24,15 +24,9 @@ class RandomProjection(nn.Module):
         """
 
         super().__init__()
-        # Register seed as buffer
-        self.register_buffer(
-            name='seed',
-            tensor=torch.tensor(seed, dtype=torch.int64),
-            persistent=True,
-        )
 
-        # Record the output features
-        self._out_features = out_features
+        # Register seed as buffer
+        self.register_buffer('seed', torch.tensor(seed, dtype=torch.int64, requires_grad=False))
 
         # Initialize the module
         self.linear = nn.Linear(
@@ -40,6 +34,12 @@ class RandomProjection(nn.Module):
             out_features=out_features,
             bias=False
         )
+
+        # Register scale parameter
+        invscale_value = torch.tensor(math.sqrt(in_features * out_features), requires_grad=False)
+        torch.round(invscale_value, out=invscale_value, decimals=6)  # Round to address non-deterministic floating point runoff across platforms
+        self.invscale = nn.Parameter(data=invscale_value, requires_grad=False)
+
         # Turn off gradient tracking
         self.linear.requires_grad_(requires_grad=False)
 
@@ -47,24 +47,20 @@ class RandomProjection(nn.Module):
         with torch.random.fork_rng():
             torch.manual_seed(seed)
             self.linear.weight[:] = torch.randn(
-                    size=(out_features, in_features),
-                    requires_grad=False
-                )
-
+                size=(out_features, in_features),
+                requires_grad=False
+            )
 
         with torch.no_grad():
-            # Round the weights to address non-deterministic floating point runoff
+            # Round the weights to address non-deterministic floating point runoff across platforms
             torch.round(self.linear.weight, out=self.linear.weight, decimals=5)
 
-            # Scale the weights
-            self.linear.weight /= math.sqrt(in_features * out_features)
-
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.linear(x)
+        return self.linear(x) / self.invscale
 
     def __repr__(self):
         return f"RandomProjection(in_features={self.linear.weight.shape[1]}, out_features={self.linear.weight.shape[0]}, seed={self.seed})"
 
     @property
     def output_shape(self) -> Tuple[int]:
-        return (self._out_features,)
+        return (self.linear.weight.shape[0],)
