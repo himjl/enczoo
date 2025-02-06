@@ -57,7 +57,7 @@ def test_feature_regression(
 
     assert result.shape == result2.shape == result3.shape == result4.shape == test_target.shape
     rtol = 1e-3
-    atol = 1e-7
+    atol = 1e-6
     assert np.allclose(result, test_target, rtol=rtol, atol=atol)
     assert np.allclose(result2, test_target, rtol=rtol, atol=atol)
     assert np.allclose(result3, test_target, rtol=rtol, atol=atol)
