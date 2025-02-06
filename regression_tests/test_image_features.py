@@ -29,6 +29,9 @@ def test_images() -> List[PIL.Image]:
     argvalues=[
         ('target_alexnet_classifier5.npy', lambda config: enczoo.AlexNet(layer_name='classifier.5', config=config)),
         ('target_rn50_avgpool.npy', lambda config: enczoo.ResNet50(layer_name='avgpool', config=config)),
+        ('target_rn50_avgpool_proj20_seed0.npy', lambda config: enczoo.ResNet50(layer_name='avgpool', config=config, random_projection_dim=20, random_projection_seed=0)),
+        ('target_rn50_avgpool_proj1000_seed0.npy', lambda config: enczoo.ResNet50(layer_name='avgpool', config=config, random_projection_dim=1000, random_projection_seed=0)),
+        ('target_rn50_avgpool_proj1000_seed1.npy', lambda config: enczoo.ResNet50(layer_name='avgpool', config=config, random_projection_dim=1000, random_projection_seed=1)),
     ]
 )
 def test_feature_regression(

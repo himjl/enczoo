@@ -32,7 +32,7 @@ class RandomProjection(nn.Module):
 
         # Initialize the linear map. This has proven impossible so far to hash consistently, due to floating point runoff, so it is not registered.
         # See: https://discuss.pytorch.org/t/saving-nn-module-to-parent-nn-module-without-registering-paremeters/132082/6
-        self.linear_wrapper = [nn.Linear(
+        self._linear_wrapper = [nn.Linear(
             in_features=in_features,
             out_features=out_features,
             bias=False,
@@ -40,22 +40,22 @@ class RandomProjection(nn.Module):
         )]
 
         # Turn off gradient tracking
-        self.linear_wrapper[0].requires_grad_(requires_grad=False)
+        self._linear_wrapper[0].requires_grad_(requires_grad=False)
 
         with torch.random.fork_rng():
             # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
-            self.linear_wrapper[0].weight[:] = torch.randn(
+            self._linear_wrapper[0].weight[:] = torch.randn(
                 size=(out_features, in_features),
                 requires_grad=False
             ) / math.sqrt(in_features * out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.linear_wrapper[0](x)
+        return self._linear_wrapper[0](x)
 
     def __repr__(self):
         return f"RandomProjection(in_features={self.in_features}, out_features={self.out_features}, seed={self.seed})"
 
     @property
     def output_shape(self) -> Tuple[int]:
-        return (self.linear.weight.shape[0],)
+        return (self._linear_wrapper[0].weight.shape[0],)
