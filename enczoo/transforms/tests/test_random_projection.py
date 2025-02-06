@@ -3,7 +3,7 @@ import pytest
 import torch
 
 import enczoo.transforms.random_projection as random_projection_layer
-
+import enczoo.utils as utils
 
 @pytest.fixture
 def input_tensor() -> torch.Tensor:
@@ -39,10 +39,12 @@ def test_deterministic(input_tensor):
         seed=0,
     )
 
-    y = mod(input_tensor)
+    # Add a test for the module hash
+    assert utils.hash_torch_module(mod) == 'ba561724e99b96831fc7e3ddcad6e04504f6863aa312636791c90b0a1d11e587'
 
-    # Should be the same result across computers
-    assert torch.isclose(y[0, 0], torch.tensor(0.8472, dtype=y.dtype), atol=1e-4)
+    # Check forward pass
+    y = mod(input_tensor)
+    assert torch.isclose(y[0, 0], torch.tensor(0.84718096, dtype=y.dtype), atol=1e-6)
 
     # Should be the same result across calls
     y2 = mod(input_tensor)
