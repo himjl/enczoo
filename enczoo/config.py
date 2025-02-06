@@ -3,21 +3,24 @@ from pathlib import Path
 
 
 class ImageEncodingConfig(pydantic.BaseModel):
+
+    # Pydantic configuration:
     model_config = pydantic.ConfigDict(
         frozen=True,
     )
 
-    frozen: bool = pydantic.Field(
-        default=True,
-        description='If True, the model is frozen and does not aggregate gradients. Caching is disabled if frozen=False.'
+    # Options:
+    trainable: bool = pydantic.Field(
+        default=False,
+        description='If False, the model is considered fixed and does not aggregate gradients. Caching is disabled if trainable=True.'
     )
 
     cachedir: Path = pydantic.Field(
-        description='The directory where the cache is stored. Note if frozen=False, the cache is disabled.'
+        description='The directory where the cache is stored. Note if trainable=True, the cache is disabled.'
     )
     in_memory_cache_size_mb: int = pydantic.Field(
         default=256,
-        description='The size of the in-memory cache in MB. Irrelevant if frozen=False.'
+        description='The size of the in-memory cache in MB. Irrelevant if trainable=True.'
     )
 
     default_batch_size: int = pydantic.Field(
@@ -27,7 +30,7 @@ class ImageEncodingConfig(pydantic.BaseModel):
 
 
 default_config = ImageEncodingConfig(
-    frozen=True,
+    trainable=False,
     cachedir=Path.home() / 'enczoo_cache',
     in_memory_cache_size_mb=256,
     default_batch_size=32

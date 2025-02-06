@@ -61,7 +61,7 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
         image_loader, model = self._load_modules()
 
-        # Ensure modules are in evaluation mode
+        # Ensure modules are in evaluation mode by default
         image_loader.train(mode=False)
         model.train(mode=False)
 

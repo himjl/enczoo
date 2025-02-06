@@ -26,13 +26,13 @@ class ImageEncoding(
             config: Union[ImageEncodingConfig, None],
     ):
         super().__init__()
-        self.config = config if config is not None else default_config
+        self.config: ImageEncodingConfig = config if config is not None else default_config
         self._module_hash = None
         self._tensor_bucket = None
         self._output_shape = None
 
-        # Ensure the model is in evaluation mode by default
-        self.train(mode=False)
+        # Set the module's mode
+        self.train(mode=self.config.trainable)
 
     @property
     def output_shape(self) -> Tuple[int, ...]:
@@ -54,7 +54,7 @@ class ImageEncoding(
 
     @property
     def module_hash(self) -> Union[str, None]:
-        if not self.config.frozen:
+        if self.config.trainable:
             return None
 
         # Turn off gradients for all parameters
@@ -68,8 +68,8 @@ class ImageEncoding(
 
     @property
     def tensor_bucket(self) -> Union[tensorbucket.TensorBucket, None]:
-        if not self.config.frozen:
-            # Caching not supported for non-frozen model
+        if self.config.trainable:
+            # Caching not supported for a trainable model
             return None
 
         # Initialize tensor bucket (for caching)
@@ -96,7 +96,7 @@ class ImageEncoding(
         Unlike self.__call__(), this method does not track gradients.
 
         Features for images not in the cache are computed using self.__call__, and cached,
-        if cache_new_features=True and self.config.frozen=True.
+        if cache_new_features=True and self.config.trainable=False.
 
         When new features are computed, this method performs image batching to avoid memory issues.
 
@@ -108,8 +108,8 @@ class ImageEncoding(
         :return:
         """
 
-        if not self.config.frozen and cache_new_features:
-            raise ValueError('Cannot cache new features unless the model is frozen.')
+        if self.config.trainable and cache_new_features:
+            raise ValueError('Cannot cache new features unless the model has self.config.trainable=False.')
 
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
         image_refs = []

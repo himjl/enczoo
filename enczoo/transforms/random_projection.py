@@ -24,6 +24,7 @@ class RandomProjection(nn.Module):
         """
 
         super().__init__()
+        self.train(mode=False)
 
         # Register inputs as buffers; these will constitute the module's hash.
         self.register_buffer('seed', torch.tensor(seed, dtype=torch.int64, requires_grad=False))
