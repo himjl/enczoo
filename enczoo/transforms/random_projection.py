@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from typing import Tuple
-
+import numpy as np
 
 class RandomProjection(nn.Module):
     """
@@ -64,14 +64,3 @@ class RandomProjection(nn.Module):
     @property
     def output_shape(self) -> Tuple[int]:
         return (self._out_features,)
-
-
-# %%
-if __name__ == '__main__':
-    rp = RandomProjection(out_features=10, in_features=100, seed=0)
-    import numpy as np
-
-    np.random.seed(0)
-    x = torch.tensor(np.random.rand(1, 100), dtype=torch.float32)
-    y = rp(x)
-    print(list(rp.parameters()))
