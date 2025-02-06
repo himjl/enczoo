@@ -39,11 +39,11 @@ def test_deterministic(input_tensor):
         out_features=1000,
         seed=0,
     )
-
+    # -1.1258000135421753
+    raise Exception(str(float(mod.linear.weight[0, 0])))
 
     # Add a test for the module hash
     assert utils.hash_torch_module(mod) == '304b73063a1da16f5825b2867f6c8c54a577f259b8cb0614a074367392898578'
-
 
     # Check forward pass
     y = mod(input_tensor)
