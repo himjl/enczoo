@@ -25,42 +25,41 @@ class RandomProjection(nn.Module):
 
         super().__init__()
 
-        # Register seed as buffer
+        # Register inputs as buffers; these will constitute the module's hash.
         self.register_buffer('seed', torch.tensor(seed, dtype=torch.int64, requires_grad=False))
+        self.register_buffer('in_features', torch.tensor(in_features, dtype=torch.int64, requires_grad=False))
+        self.register_buffer('out_features', torch.tensor(out_features, dtype=torch.int64, requires_grad=False))
 
-        # Initialize the module
-        self.linear = nn.Linear(
+        # Initialize the linear map. This has proven impossible so far to hash consistently, due to floating point runoff, so it is not registered.
+        # See: https://discuss.pytorch.org/t/saving-nn-module-to-parent-nn-module-without-registering-paremeters/132082/6
+        self.linear_wrapper = [nn.Linear(
             in_features=in_features,
             out_features=out_features,
             bias=False,
             dtype=torch.float32,
-        )
-
-        # Register scale parameter
-        invscale_value = torch.tensor(math.sqrt(in_features * out_features), requires_grad=False, dtype=torch.float32)
-        self.invscale = nn.Parameter(data=invscale_value, requires_grad=False)
-        torch.round(self.invscale, out=self.invscale, decimals=4)  # Round to address non-deterministic floating point runoff across platforms
+        )]
 
         # Turn off gradient tracking
-        self.linear.requires_grad_(requires_grad=False)
+        self.linear_wrapper[0].requires_grad_(requires_grad=False)
 
         with torch.random.fork_rng():
             # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
-            self.linear.weight[:] = torch.randn(
+            self.linear_wrapper[0].weight[:] = torch.randn(
                 size=(out_features, in_features),
                 requires_grad=False
-            )
-
-            # Round the weights to address non-deterministic floating point runoff across platforms:
-            torch.round(self.linear.weight, out=self.linear.weight, decimals=4)
+            ) / math.sqrt(in_features * out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.linear(x) / self.invscale
+        return self.linear_wrapper[0](x)
 
     def __repr__(self):
-        return f"RandomProjection(in_features={self.linear.weight.shape[1]}, out_features={self.linear.weight.shape[0]}, seed={self.seed})"
+        return f"RandomProjection(in_features={self.in_features}, out_features={self.out_features}, seed={self.seed})"
 
     @property
     def output_shape(self) -> Tuple[int]:
         return (self.linear.weight.shape[0],)
+
+
+if __name__ == '__main__':
+    rp = RandomProjection(10, 100, 0)
