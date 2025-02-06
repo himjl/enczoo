@@ -40,6 +40,12 @@ def test_deterministic(input_tensor):
         seed=0,
     )
 
+
+    # Add a test for the module hash
+    assert utils.hash_torch_module(mod) == '60f9d7b7363eaf1b236b8ed8652be436da23d332b16e413e3d549bc8a72b1dd9'
+
+
+
     # Check forward pass
     y = mod(input_tensor)
     assert torch.isclose(y[0, 0], torch.tensor(0.037887085, dtype=y.dtype), atol=1e-6)
@@ -47,7 +53,3 @@ def test_deterministic(input_tensor):
     # Should be the same result across calls
     y2 = mod(input_tensor)
     assert torch.allclose(y, y2)
-
-    # Add a test for the module hash
-    assert utils.hash_torch_module(mod) == '0109ee1a7f3a93af0e11bf2292feaa48ec723676f3d10ec6b00fd34bb2acc713'
-
