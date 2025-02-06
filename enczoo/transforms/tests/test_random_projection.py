@@ -49,4 +49,4 @@ def test_deterministic(input_tensor):
     assert torch.allclose(y, y2)
 
     # Add a test for the module hash
-    assert utils.hash_torch_module(mod) =='ba561724e99b96831fc7e3ddcad6e04504f6863aa312636791c90b0a1d11e587'# '7d06d1d4ac90d5bd3c6601b49da0b8c3dd4c3a4415e80e8e080ded73b545756e'
+    assert utils.hash_torch_module(mod) == '4dbb2525f3cf5beddd2dfe7bdd7ece3117a787db1dd4bf4adc61c9dfd86d2542'

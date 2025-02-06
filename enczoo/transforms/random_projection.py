@@ -51,6 +51,9 @@ class RandomProjection(nn.Module):
                     requires_grad=False
                 )
 
+            # Round the weights to fix non-deterministic floating point errors
+            torch.round(self.linear.weight, out=self.linear.weight, decimals=5)
+
         with torch.no_grad():
             # Scale the weights
             self.linear.weight /= math.sqrt(in_features * out_features)
