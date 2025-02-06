@@ -32,11 +32,12 @@ class RandomProjection(nn.Module):
         self.linear = nn.Linear(
             in_features=in_features,
             out_features=out_features,
-            bias=False
+            bias=False,
+            dtype=torch.float32,
         )
 
         # Register scale parameter
-        invscale_value = torch.tensor(math.sqrt(in_features * out_features), requires_grad=False)
+        invscale_value = torch.tensor(math.sqrt(in_features * out_features), requires_grad=False, dtype=torch.float32)
         self.invscale = nn.Parameter(data=invscale_value, requires_grad=False)
         torch.round(self.invscale, out=self.invscale, decimals=5)  # Round to address non-deterministic floating point runoff across platforms
 
