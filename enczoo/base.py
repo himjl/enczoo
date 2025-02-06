@@ -111,6 +111,9 @@ class ImageEncoding(
         if self.config.trainable and cache_new_features:
             raise ValueError('Cannot cache new features unless the model has self.config.trainable=False.')
 
+        if batch_size < 1:
+            raise ValueError(f'batch_size must be at least 1, but got {batch_size}.')
+
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
         image_refs = []
         ref_to_image: Dict[mref.ImageRef, PIL.Image] = {}
@@ -136,7 +139,8 @@ class ImageEncoding(
 
         # Compute and cache backbone features for any new ImageRefs:
         delete_keys = []
-        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable=len(compute_image_refs) == 0)
+        ncompute_images = len(compute_image_refs)
+        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable=ncompute_images <= batch_size)
         for batch_image_refs in utils.iterate_batches(compute_image_refs, batch_size=batch_size):
             # Resolve ImageRefs into PIL.Images:
             batch_images = []
