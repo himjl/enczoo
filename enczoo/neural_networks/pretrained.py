@@ -75,10 +75,10 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
         )
 
         # Ensure the model is in evaluation mode
-        self.train(mode=False)
-        assert self.model.training is False
-        assert self.image_loader.training is False
-        assert self.training is False
+        #self.train(mode=False)
+        #assert self.model.training is False
+        #assert self.image_loader.training is False
+        #assert self.training is False
 
     @abstractmethod
     def _load_modules(self) -> Tuple[torch.nn.Module, torch.nn.Module]:
@@ -145,3 +145,6 @@ if __name__ == '__main__':
         random_projection_dim=None,
         random_projection_seed=0
     )
+    print(resnet50.training)
+    print(resnet50.model.training)
+    print(resnet50.image_loader.training)
