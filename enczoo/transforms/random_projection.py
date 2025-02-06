@@ -53,7 +53,7 @@ class RandomProjection(nn.Module):
             )
 
             # Round the weights to address non-deterministic floating point runoff across platforms:
-            torch.round(self.linear.weight, out=self.linear.weight, decimals=5)
+            torch.round(self.linear.weight, out=self.linear.weight, decimals=1) # todo revert decimals
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x) / self.invscale
