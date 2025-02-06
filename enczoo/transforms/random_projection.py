@@ -59,7 +59,3 @@ class RandomProjection(nn.Module):
     @property
     def output_shape(self) -> Tuple[int]:
         return (self.linear.weight.shape[0],)
-
-
-if __name__ == '__main__':
-    rp = RandomProjection(10, 100, 0)
