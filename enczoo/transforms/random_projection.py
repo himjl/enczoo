@@ -46,12 +46,11 @@ class RandomProjection(nn.Module):
         # Set the weights from a standard normal distribution
         gen = torch.Generator()
         gen.manual_seed(seed)
-        self.linear.weight[:] = torch.randn(
-                size=(out_features, in_features),
-                generator=gen,
-                requires_grad=False,
-                dtype=self.linear.weight.dtype
-            )
+        self.linear.weight[:] = 0 # torch.randn(
+           #     size=(out_features, in_features),
+           #     generator=gen,
+           #     requires_grad=False
+           # )
 
         with torch.no_grad():
             # Scale the weights
@@ -59,6 +58,9 @@ class RandomProjection(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x)
+
+    def __repr__(self):
+        return f"RandomProjection(in_features={self.linear.weight.shape[1]}, out_features={self.linear.weight.shape[0]}, seed={self.seed})"
 
     @property
     def output_shape(self) -> Tuple[int]:
