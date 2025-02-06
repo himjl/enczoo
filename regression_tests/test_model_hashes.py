@@ -17,7 +17,7 @@ import enczoo.utils as utils
         ('14f5feda12caa94047dda42c319dc2daa46017c3272aa4900840f2ec00008747', enczoo.AlexNet(layer_name='classifier.5', random_projection_dim=1000, random_projection_seed=0)),
     ]
 )
-def test_pixel_hashing(
+def test_model_hashing(
         target_hash: str,
         model: enczoo.ImageEncoding
 ):

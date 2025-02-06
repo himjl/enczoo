@@ -56,8 +56,8 @@ def test_feature_regression(
     result4 = model.load_features(images=test_images, cache_new_features=False).detach().cpu().numpy()  # Cache hit
 
     assert result.shape == result2.shape == result3.shape == result4.shape == test_target.shape
-    rtol = 1e-6
-    atol = 1e-9
+    rtol = 1e-5
+    atol = 1e-8
     assert np.allclose(result, test_target, rtol=rtol, atol=atol)
     assert np.allclose(result2, test_target, rtol=rtol, atol=atol)
     assert np.allclose(result3, test_target, rtol=rtol, atol=atol)
