@@ -1,12 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Union, List, Tuple
-
 import PIL.Image
 import torch
 import torchvision.models
 import torchvision.transforms.functional as F
+from abc import ABC, abstractmethod
+from typing import Union, List, Tuple
 
-from enczoo.neural_networks.base import ImageNeuralNetwork
+from enczoo.neural_networks.base import ImageNeuralNetwork, ImageEncodingConfig
 
 
 class StandardImageLoader(torch.nn.Module):
@@ -14,6 +13,8 @@ class StandardImageLoader(torch.nn.Module):
     A variant of the image loader used for many torchvision models. However, this
     variant does not necessarily "chop" the image margins. That is, this
     image loader results in the largest square sub-image (unlike the standard image loader, which returns a proportionally smaller sub-image).
+
+    It also coerces the image to RGB mode, if it is not already in that mode.
 
     See the ImageClassification torchvision.transforms._presents.py module for the original image loader.
 
@@ -24,6 +25,8 @@ class StandardImageLoader(torch.nn.Module):
     """
 
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
+        img = img.convert('RGB')
+
         img = F.resize(
             img=img,
             size=[224],
@@ -51,13 +54,14 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             layer_name: str,
             random_projection_dim: Union[int, None] = None,
             random_projection_seed: Union[int, None] = None,
+            config: ImageEncodingConfig = None,
     ):
         if layer_name not in self.layer_names:
             raise ValueError(f'Unknown layer_name: {layer_name}. Available:\n{self.layer_names}')
 
         image_loader, model = self._load_modules()
 
-        # Ensure modules are in evaluation mode
+        # Ensure modules are in evaluation mode by default
         image_loader.train(mode=False)
         model.train(mode=False)
 
@@ -67,13 +71,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             layer_name=layer_name,
             random_projection_dim=random_projection_dim,
             random_projection_seed=random_projection_seed,
+            config=config,
         )
-
-        # Ensure the model is in evaluation mode
-        self.train(mode=False)
-        assert self.model.training is False
-        assert self.image_loader.training is False
-        assert self.training is False
 
     @abstractmethod
     def _load_modules(self) -> Tuple[torch.nn.Module, torch.nn.Module]:
@@ -85,7 +84,6 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
 
 class AlexNet(_PretrainedNN):
-
     # A subset of all layers (each separated by one nonlinearity):
     layer_names = [
         'features.1',
@@ -140,3 +138,6 @@ if __name__ == '__main__':
         random_projection_dim=None,
         random_projection_seed=0
     )
+    print(resnet50.training)
+    print(resnet50.model.training)
+    print(resnet50.image_loader.training)

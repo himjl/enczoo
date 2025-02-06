@@ -1,9 +1,7 @@
-import functools
-from typing import Tuple, Union
-
 import torch
 import torch.nn as nn
-import numpy as np
+from typing import Tuple
+import math
 
 
 class RandomProjection(nn.Module):
@@ -26,55 +24,39 @@ class RandomProjection(nn.Module):
         """
 
         super().__init__()
-        # Register seed as buffer
-        self.register_buffer(
-            name='seed',
-            tensor=torch.tensor(seed, dtype=torch.int64),
-            persistent=True,
-        )
+        self.train(mode=False)
 
-        # Record the output features
-        self._out_features = out_features
+        # Register inputs as buffers; these will constitute the module's hash.
+        self.register_buffer('seed', torch.tensor(seed, dtype=torch.int64, requires_grad=False))
+        self.register_buffer('in_features', torch.tensor(in_features, dtype=torch.int64, requires_grad=False))
+        self.register_buffer('out_features', torch.tensor(out_features, dtype=torch.int64, requires_grad=False))
 
-        # Initialize the module
-        self.linear = nn.Linear(
+        # Initialize the linear map. This has proven impossible so far to hash consistently, due to floating point runoff, so it is not registered.
+        # See: https://discuss.pytorch.org/t/saving-nn-module-to-parent-nn-module-without-registering-paremeters/132082/6
+        self._linear_wrapper = [nn.Linear(
             in_features=in_features,
             out_features=out_features,
-            bias=False
-        )
+            bias=False,
+            dtype=torch.float32,
+        )]
+
         # Turn off gradient tracking
-        self.linear.requires_grad_(requires_grad=False)
+        self._linear_wrapper[0].requires_grad_(requires_grad=False)
 
-
-        # Set the weights from a standard normal distribution
-        gen = torch.Generator()
-        gen.manual_seed(seed)
-        self.linear.weight[:] = torch.randn(
-            size=(out_features, in_features),
-            generator=gen,
-            requires_grad=False
-        )
-
-        with torch.no_grad():
-            # Scale the weights
-            self.linear.weight /= np.sqrt(in_features * out_features)
+        with torch.random.fork_rng():
+            # Set the weights from a standard normal distribution:
+            torch.manual_seed(seed)
+            self._linear_wrapper[0].weight[:] = torch.randn(
+                size=(out_features, in_features),
+                requires_grad=False
+            ) / math.sqrt(in_features * out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.linear(x)
+        return self._linear_wrapper[0](x)
 
     def __repr__(self):
-        return f"RandomProjection(in_features={self.linear.weight.shape[1]}, out_features={self.linear.weight.shape[0]}, seed={self.seed})"
+        return f"RandomProjection(in_features={self.in_features}, out_features={self.out_features}, seed={self.seed})"
 
     @property
     def output_shape(self) -> Tuple[int]:
-        return (self._out_features,)
-
-# %%
-if __name__ == '__main__':
-    rp = RandomProjection(out_features=10, in_features=100, seed=0)
-    import numpy as np
-
-    np.random.seed(0)
-    x = torch.tensor(np.random.rand(1, 100), dtype=torch.float32)
-    y = rp(x)
-    print(list(rp.parameters()))
+        return (self._linear_wrapper[0].weight.shape[0],)

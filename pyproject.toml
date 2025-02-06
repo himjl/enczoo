@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "enczoo"
-version = "0.0.1"
+version = "0.0.2"
 description = "A zoo of encoding models"
 authors = [
     { name = "Michael J. Lee", email = "mil@mit.edu" }
@@ -20,6 +20,8 @@ dependencies = [
     "pydantic>=2.10",
     "torch>=2.4",
     "torchvision>=0.19",
+    "tensorbucket @ git+https://github.com/himjl/tensorbucket.git@v0.0.1",
+    "mref @ git+https://github.com/himjl/mref.git@v0.0.1",
 ]
 
 [project.urls]

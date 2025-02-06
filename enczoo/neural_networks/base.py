@@ -1,14 +1,18 @@
-from abc import ABC
-from enczoo.base import ImageEncoding
-import torch
-from typing import Literal, Union, Dict, List, Tuple
-import numpy as np
 import PIL.Image
+import numpy as np
+import torch
 import torchvision
+from abc import ABC
+from typing import Union, Dict, List, Tuple
+
+from enczoo.base import ImageEncoding, ImageEncodingConfig
 from enczoo.transforms.random_projection import RandomProjection
 
 
-class ImageNeuralNetwork(ImageEncoding, ABC):
+class ImageNeuralNetwork(
+    ImageEncoding,
+    ABC
+):
     def __init__(
             self,
             image_loader: Union[torch.nn.Module, torchvision.transforms.Compose],
@@ -16,8 +20,12 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
             layer_name: str,
             random_projection_dim: Union[int, None],
             random_projection_seed: Union[int, None],
+            config: ImageEncodingConfig = None,
     ):
-        super().__init__()
+        super().__init__(config=config)
+
+        # Ensure modules will be registered in evaluation mode
+        self.train(mode=False)
 
         # Register buffers to ensure the model's hash is distinctive for each layer
         self.register_buffer('layer_name', torch.tensor([ord(c) for c in layer_name], dtype=torch.int16))
@@ -42,7 +50,8 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
                     next_root_name = root_name + '.' + module_name if root_name != '' else module_name
                 else:
                     raise ValueError('Empty module name found in model!')
-
+                # Ensure module is in evaluation mode
+                submodule.train(mode=False)
                 # Recursive call:
                 submodule_names = register_hook(submodule, root_name=next_root_name, activations_dict=activations_dict)
 
@@ -75,9 +84,6 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
 
         if layer_name not in self._layer_names:
             raise ValueError(f'Layer name {layer_name} not found in model.\nAvailable layer names: {self._layer_names}')
-
-        # Turn off training mode by default
-        self.train(mode=False)
 
         # Populate the sizes of the layers with a forward pass
         with torch.no_grad():
@@ -135,10 +141,3 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         :return: a dictionary mapping layer names to the number of features in the layer.
         """
         return self._layer_to_shape
-
-    @property
-    def output_shape(self) -> Tuple[int, ...]:
-        if self.random_projection is None:
-            return self._layer_to_shape[self._layer_name]
-        else:
-            return self.random_projection.output_shape

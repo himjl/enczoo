@@ -1,19 +1,20 @@
 import PIL.Image
+import numpy as np
 import pytest
 import torch
-import torchvision.transforms.functional
+from typing import List
+
 from enczoo import AlexNet
-import numpy as np
-from typing import Tuple, List
 
 
 @pytest.fixture
 def alexnet():
     return AlexNet(
-        layer_name = AlexNet.layer_names[-1],
+        layer_name=AlexNet.layer_names[-1],
         random_projection_dim=None,
         random_projection_seed=0
     )
+
 
 @pytest.fixture
 def images() -> List[PIL.Image.Image]:
@@ -46,4 +47,3 @@ def test_alexnet_forward(alexnet, image_batch1, image_batch2):
     # Test output does not depend on batch size
     result_bigger_batch = alexnet(images=image_batch2)
     assert torch.allclose(result[0], result_bigger_batch[0], rtol=1e-3)
-
