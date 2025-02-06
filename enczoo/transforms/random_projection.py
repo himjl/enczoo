@@ -47,10 +47,10 @@ class RandomProjection(nn.Module):
         with torch.random.fork_rng():
             # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
-            self.linear.weight[:] = 0 #torch.randn(
-            #    size=(out_features, in_features),
-            #    requires_grad=False
-            #)
+            self.linear.weight[:] = torch.randn(
+                size=(out_features, in_features),
+                requires_grad=False
+            )
 
             # Round the weights to address non-deterministic floating point runoff across platforms:
             torch.round(self.linear.weight, out=self.linear.weight, decimals=5)
