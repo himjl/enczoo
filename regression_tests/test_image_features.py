@@ -1,15 +1,14 @@
-from pathlib import Path
-from typing import List, Callable
-
 import PIL.Image
 import numpy as np
 import pytest
+from pathlib import Path
+from typing import List, Callable
 
 import enczoo
 from enczoo.config import ImageEncodingConfig
-from pathlib import Path
 
 _dir = Path(__file__).parent
+
 
 # %%
 @pytest.fixture
@@ -38,9 +37,8 @@ def test_feature_regression(
         model_constructor: Callable[[ImageEncodingConfig], enczoo.ImageEncoding],
         tmpdir,
 ):
-
     config = ImageEncodingConfig(
-        cachedir = Path(tmpdir)
+        cachedir=Path(tmpdir)
     )
     model = model_constructor(config)
 
@@ -55,7 +53,7 @@ def test_feature_regression(
 
     # Try using load_features:
     result3 = model.load_features(images=test_images, cache_new_features=True).detach().cpu().numpy()
-    result4 = model.load_features(images=test_images, cache_new_features=False).detach().cpu().numpy() # Cache hit
+    result4 = model.load_features(images=test_images, cache_new_features=False).detach().cpu().numpy()  # Cache hit
 
     assert result.shape == result2.shape == result3.shape == result4.shape == test_target.shape
     rtol = 1e-6

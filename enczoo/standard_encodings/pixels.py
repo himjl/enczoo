@@ -1,8 +1,7 @@
-from typing import List, Tuple
-
 import PIL.Image
 import torch
 import torchvision.transforms.v2 as v2
+from typing import List
 
 from enczoo.base import ImageEncoding, ImageEncodingConfig
 

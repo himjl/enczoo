@@ -1,6 +1,6 @@
 from enczoo.base import ImageEncoding
-from enczoo.standard_encodings.pixels import Pixels
 from enczoo.neural_networks.pretrained import ResNet50, AlexNet
+from enczoo.standard_encodings.pixels import Pixels
 
 __all__ = [
     'ImageEncoding',
@@ -8,4 +8,3 @@ __all__ = [
     'ResNet50',
     'AlexNet'
 ]
-

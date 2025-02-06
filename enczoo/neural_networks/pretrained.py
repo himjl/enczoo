@@ -1,10 +1,9 @@
-from abc import ABC, abstractmethod
-from typing import Union, List, Tuple
-
 import PIL.Image
 import torch
 import torchvision.models
 import torchvision.transforms.functional as F
+from abc import ABC, abstractmethod
+from typing import Union, List, Tuple
 
 from enczoo.neural_networks.base import ImageNeuralNetwork, ImageEncodingConfig
 
@@ -26,7 +25,6 @@ class StandardImageLoader(torch.nn.Module):
     """
 
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
-
         img = img.convert('RGB')
 
         img = F.resize(
@@ -73,7 +71,7 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             layer_name=layer_name,
             random_projection_dim=random_projection_dim,
             random_projection_seed=random_projection_seed,
-            config = config,
+            config=config,
         )
 
     @abstractmethod
@@ -86,7 +84,6 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
 
 class AlexNet(_PretrainedNN):
-
     # A subset of all layers (each separated by one nonlinearity):
     layer_names = [
         'features.1',

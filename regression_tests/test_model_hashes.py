@@ -1,7 +1,8 @@
 # %%
 import pytest
-import enczoo.utils as utils
+
 import enczoo
+import enczoo.utils as utils
 
 
 @pytest.mark.parametrize(
@@ -20,10 +21,8 @@ def test_pixel_hashing(
         target_hash: str,
         model: enczoo.ImageEncoding
 ):
-
     # Self-reported hash
     assert model.module_hash == target_hash
 
     # Manual hash
     assert utils.hash_torch_module(model) == target_hash
-

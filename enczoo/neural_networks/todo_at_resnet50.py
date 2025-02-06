@@ -1,18 +1,12 @@
-import os
-import urllib.request
-from urllib.parse import urlparse
-
 import geo.config as config
+import geo.utils as utils
+import os
 import torch
 import torch as ch
-import geo.utils as utils
-from tqdm import tqdm
-import torch
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
-from typing import Union
-import PIL.Image
 from torchvision.transforms import v2
+from urllib.parse import urlparse
 
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
@@ -36,25 +30,30 @@ class FakeReLU(torch.autograd.Function):
     def backward(ctx, grad_output):
         return grad_output
 
+
 class FakeReLUM(nn.Module):
     def forward(self, x):
         return FakeReLU.apply(x)
+
 
 class SequentialWithArgs(torch.nn.Sequential):
     def forward(self, input, *args, **kwargs):
         vs = list(self._modules.values())
         l = len(vs)
         for i in range(l):
-            if i == l-1:
+            if i == l - 1:
                 input = vs[i](input, *args, **kwargs)
             else:
                 input = vs[i](input)
         return input
 
+
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=stride,
+        padding=dilation, groups=groups, bias=False, dilation=dilation
+        )
 
 
 def conv1x1(in_planes, out_planes, stride=1):
@@ -66,8 +65,10 @@ class BasicBlock(nn.Module):
     expansion = 1
     __constants__ = ['downsample']
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
+    def __init__(
+            self, inplanes, planes, stride=1, downsample=None, groups=1,
+            base_width=64, dilation=1, norm_layer=None
+            ):
         super(BasicBlock, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -110,8 +111,10 @@ class Bottleneck(nn.Module):
     expansion = 4
     __constants__ = ['downsample']
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, groups=1,
-                 base_width=64, dilation=1, norm_layer=None):
+    def __init__(
+            self, inplanes, planes, stride=1, downsample=None, groups=1,
+            base_width=64, dilation=1, norm_layer=None
+            ):
         super(Bottleneck, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -155,9 +158,11 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
-                 groups=1, width_per_group=64, replace_stride_with_dilation=None,
-                 norm_layer=None):
+    def __init__(
+            self, block, layers, num_classes=1000, zero_init_residual=False,
+            groups=1, width_per_group=64, replace_stride_with_dilation=None,
+            norm_layer=None
+            ):
         super(ResNet, self).__init__()
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
@@ -170,22 +175,32 @@ class ResNet(nn.Module):
             # the 2x2 stride with a dilated convolution instead
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
-            raise ValueError("replace_stride_with_dilation should be None "
-                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+            raise ValueError(
+                "replace_stride_with_dilation should be None "
+                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
+                )
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
-                               bias=False)
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=7, stride=2, padding=3,
+            bias=False
+            )
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
-                                       dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
-                                       dilate=replace_stride_with_dilation[1])
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
-                                       dilate=replace_stride_with_dilation[2])
+        self.layer2 = self._make_layer(
+            block, 128, layers[1], stride=2,
+            dilate=replace_stride_with_dilation[0]
+            )
+        self.layer3 = self._make_layer(
+            block, 256, layers[2], stride=2,
+            dilate=replace_stride_with_dilation[1]
+            )
+        self.layer4 = self._make_layer(
+            block, 512, layers[3], stride=2,
+            dilate=replace_stride_with_dilation[2]
+            )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -220,13 +235,21 @@ class ResNet(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation, norm_layer))
+        layers.append(
+            block(
+                self.inplanes, planes, stride, downsample, self.groups,
+                self.base_width, previous_dilation, norm_layer
+                )
+            )
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation,
-                                norm_layer=norm_layer))
+            layers.append(
+                block(
+                    self.inplanes, planes, groups=self.groups,
+                    base_width=self.base_width, dilation=self.dilation,
+                    norm_layer=norm_layer
+                    )
+                )
 
         return SequentialWithArgs(*layers)
         # return nn.Sequential(*layers)
@@ -256,8 +279,10 @@ class ResNet(nn.Module):
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     model = ResNet(block, layers, **kwargs)
     if pretrained:
-        state_dict = load_state_dict_from_url(model_urls[arch],
-                                              progress=progress)
+        state_dict = load_state_dict_from_url(
+            model_urls[arch],
+            progress=progress
+            )
         model.load_state_dict(state_dict)
     return model
 
@@ -270,14 +295,18 @@ def resnet50(pretrained=False, progress=True, **kwargs):
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
-                   **kwargs)
+    return _resnet(
+        'resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
+        **kwargs
+        )
+
 
 class InputNormalize(ch.nn.Module):
     '''
     A module (custom layer) for normalizing the input to have a fixed
     mean and standard deviation (user-specified).
     '''
+
     def __init__(self, new_mean, new_std):
         super(InputNormalize, self).__init__()
         new_std = new_std[..., None, None]
@@ -288,13 +317,13 @@ class InputNormalize(ch.nn.Module):
 
     def forward(self, x):
         x = ch.clamp(x, 0, 1)
-        x_normalized = (x - self.new_mean)/self.new_std
+        x_normalized = (x - self.new_mean) / self.new_std
         return x_normalized
 
     @staticmethod
     def initialize_from_state_dict(state_dict):
-        mean =  state_dict['model']['module.normalizer.new_mean'] #ch.tensor([0.485, 0.456, 0.406]),
-        std =  state_dict['model']['module.normalizer.new_std'] #ch.tensor([0.229, 0.224, 0.225]),
+        mean = state_dict['model']['module.normalizer.new_mean']  # ch.tensor([0.485, 0.456, 0.406]),
+        std = state_dict['model']['module.normalizer.new_std']  # ch.tensor([0.229, 0.224, 0.225]),
         normalizer = InputNormalize(mean, std)
         return normalizer
 
@@ -313,7 +342,7 @@ def load_model(
     save_location = config.config.cachedir / 'pretrained_weights' / os.path.basename(urlparse(checkpoint_url).path)
 
     if not save_location.exists():
-        utils.download_file(url = checkpoint_url, output_path = save_location)
+        utils.download_file(url=checkpoint_url, output_path=save_location)
 
     state_dict = torch.load(save_location, map_location=device, weights_only=False)
     base_model_state_dict = {}
@@ -329,7 +358,8 @@ def load_model(
 
     return model
 
-def load_image_loader() ->  torch.nn.Module:
+
+def load_image_loader() -> torch.nn.Module:
     new_mean = [0.485, 0.456, 0.406]
     new_std = [0.229, 0.224, 0.225]
     image_loader = v2.Compose(
@@ -342,6 +372,7 @@ def load_image_loader() ->  torch.nn.Module:
         ]
     )
     return image_loader
+
 
 if __name__ == '__main__':
     x = load_model('cpu')

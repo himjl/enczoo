@@ -1,24 +1,14 @@
-import contextlib
-from abc import ABC, abstractmethod
-from typing import List, Tuple, Union, Dict, Optional
-from pathlib import Path
 import PIL.Image
-import torch
-
-import mref
-import tensorbucket
-
-import pydantic
-
 import numpy as np
+import torch
+from abc import ABC, abstractmethod
+from tqdm import tqdm
+from typing import List, Tuple, Union, Dict
 
 import enczoo.utils as utils
+import mref
+import tensorbucket
 from enczoo.config import ImageEncodingConfig, default_config
-
-from tqdm import tqdm
-
-
-# %%
 
 
 # %%
@@ -146,7 +136,7 @@ class ImageEncoding(
 
         # Compute and cache backbone features for any new ImageRefs:
         delete_keys = []
-        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable = len(compute_image_refs) == 0)
+        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable=len(compute_image_refs) == 0)
         for batch_image_refs in utils.iterate_batches(compute_image_refs, batch_size=batch_size):
             # Resolve ImageRefs into PIL.Images:
             batch_images = []

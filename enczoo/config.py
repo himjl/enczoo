@@ -3,7 +3,6 @@ from pathlib import Path
 
 
 class ImageEncodingConfig(pydantic.BaseModel):
-
     model_config = pydantic.ConfigDict(
         frozen=True,
     )

@@ -1,7 +1,8 @@
-import enczoo.transforms.random_projection as random_projection_layer
-import torch
 import numpy as np
 import pytest
+import torch
+
+import enczoo.transforms.random_projection as random_projection_layer
 
 
 @pytest.fixture
