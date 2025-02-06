@@ -11,10 +11,10 @@ import enczoo.utils as utils
         ('8cc79290dc3859ce6bfaebc75272bd054ac638f51aba2403cc73158d8af05a49', enczoo.Pixels(size=16)),
         ('6c0180097dfa07ceb88d615aaafe3204292ce210082648da4723ca854100fb0e', enczoo.ResNet50(layer_name='layer1.1.relu')),
         ('aecd510a627ffe402f89589bd57474764443e9c49f43f63193aafc73a26f59bb', enczoo.ResNet50(layer_name='avgpool')),
-        #('893c0e0d7e72729eb6f741e7fa3cca88afd34afaddf9a3993c6595803b24b546', enczoo.ResNet50(layer_name='avgpool', random_projection_dim=1000, random_projection_seed=0)),
-        #('ef1fecd65470df7709176a75ddca8145b6d84a81fba177bcb5c20e5ff72b9e46', enczoo.ResNet50(layer_name='avgpool', random_projection_dim=1000, random_projection_seed=1)),
-        #('ba0bf7c02ba4e991a8e934669447e08fb3aee7bab75753fe0294fe1dfabca9c7', enczoo.ResNet50(layer_name='avgpool', random_projection_dim=500, random_projection_seed=0)),
-        #('14f5feda12caa94047dda42c319dc2daa46017c3272aa4900840f2ec00008747', enczoo.AlexNet(layer_name='classifier.5', random_projection_dim=1000, random_projection_seed=0)),
+        ('d9cb0ba6812fc9708adb307b0d749137cd6ff1198ea891569c0461bde70fb483', enczoo.ResNet50(layer_name='avgpool', random_projection_dim=1000, random_projection_seed=0)),
+        ('77413ddc04e9dcc9b9b4eea9e45b5602eb249a38c84f0cc9c90f7da1a9dff938', enczoo.ResNet50(layer_name='avgpool', random_projection_dim=1000, random_projection_seed=1)),
+        ('c01b48cd3574408a3fcbc176d9e24b75e782873a7ffe7733ca5f6e43f62ab252', enczoo.ResNet50(layer_name='avgpool', random_projection_dim=500, random_projection_seed=0)),
+        ('b33f496f66623b23c2e3e8e21a9a7de36d89c4557668090c6e410ba5955edc6a', enczoo.AlexNet(layer_name='classifier.5', random_projection_dim=1000, random_projection_seed=0)),
     ]
 )
 def test_model_hashing(
