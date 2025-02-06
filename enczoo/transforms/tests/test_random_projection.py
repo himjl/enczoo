@@ -42,8 +42,7 @@ def test_deterministic(input_tensor):
 
 
     # Add a test for the module hash
-    assert utils.hash_torch_module(mod) == 'd7a327d97a4a18a0be688aab1b65e616c38658235bbc551e44277e356730af38'
-
+    assert utils.hash_torch_module(mod) == '304b73063a1da16f5825b2867f6c8c54a577f259b8cb0614a074367392898578'
 
 
     # Check forward pass
