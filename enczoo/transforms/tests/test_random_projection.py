@@ -36,17 +36,18 @@ def input_tensor() -> torch.Tensor:
 def test_deterministic(input_tensor):
     mod = random_projection_layer.RandomProjection(
         in_features=input_tensor.shape[1],
-        out_features=2,
+        out_features=1000,
         seed=0,
     )
 
     # Check forward pass
     y = mod(input_tensor)
-    assert torch.isclose(y[0, 0], torch.tensor(0.84718096, dtype=y.dtype), atol=1e-6)
+    assert torch.isclose(y[0, 0], torch.tensor(0.037887085, dtype=y.dtype), atol=1e-6)
 
     # Should be the same result across calls
     y2 = mod(input_tensor)
     assert torch.allclose(y, y2)
 
     # Add a test for the module hash
-    assert utils.hash_torch_module(mod) == '47250b441dc7442f35e9b7adc43c3110c88637e1c2c457aae3c94867fcf4f0ef'
+    assert utils.hash_torch_module(mod) == '0109ee1a7f3a93af0e11bf2292feaa48ec723676f3d10ec6b00fd34bb2acc713'
+

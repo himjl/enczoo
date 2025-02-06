@@ -37,23 +37,23 @@ class RandomProjection(nn.Module):
 
         # Register scale parameter
         invscale_value = torch.tensor(math.sqrt(in_features * out_features), requires_grad=False)
-        torch.round(invscale_value, out=invscale_value, decimals=6)  # Round to address non-deterministic floating point runoff across platforms
+        torch.round(invscale_value, out=invscale_value, decimals=5)  # Round to address non-deterministic floating point runoff across platforms
         self.invscale = nn.Parameter(data=invscale_value, requires_grad=False)
 
         # Turn off gradient tracking
         self.linear.requires_grad_(requires_grad=False)
 
-        # Set the weights from a standard normal distribution
         with torch.random.fork_rng():
+            # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
             self.linear.weight[:] = torch.randn(
                 size=(out_features, in_features),
                 requires_grad=False
             )
 
-        with torch.no_grad():
-            # Round the weights to address non-deterministic floating point runoff across platforms
+            # Round the weights to address non-deterministic floating point runoff across platforms:
             torch.round(self.linear.weight, out=self.linear.weight, decimals=5)
+
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x) / self.invscale
