@@ -44,13 +44,12 @@ class RandomProjection(nn.Module):
         self.linear.requires_grad_(requires_grad=False)
 
         # Set the weights from a standard normal distribution
-        gen = torch.Generator()
-        gen.manual_seed(seed)
-        self.linear.weight[:] = 0 # torch.randn(
-           #     size=(out_features, in_features),
-           #     generator=gen,
-           #     requires_grad=False
-           # )
+        with torch.random.fork_rng():
+            torch.manual_seed(seed)
+            self.linear.weight[:] = torch.randn(
+                    size=(out_features, in_features),
+                    requires_grad=False
+                )
 
         with torch.no_grad():
             # Scale the weights
