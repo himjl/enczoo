@@ -13,25 +13,12 @@ import pydantic
 import numpy as np
 
 import enczoo.utils as utils
+from enczoo.config import ImageEncodingConfig, default_config
 
 from tqdm import tqdm
 
 
 # %%
-
-class ImageEncodingConfig(pydantic.BaseModel):
-    cachedir: Path = pydantic.Field(
-        default=Path.home() / 'enczoo_cache',
-        description='The directory where the cache is stored. Note if frozen=False, the cache is disabled.'
-    )
-    in_memory_cache_size_mb: int = pydantic.Field(
-        default=256,
-        description='The size of the in-memory cache in MB. Irrelevant if frozen=False.'
-    )
-    frozen: bool = pydantic.Field(
-        default=True,
-        description='If True, the model is frozen and does not aggregate gradients. Caching is disabled if frozen=False.'
-    )
 
 
 # %%
@@ -49,7 +36,7 @@ class ImageEncoding(
             config: Union[ImageEncodingConfig, None],
     ):
         super().__init__()
-        self.config = config if config is not None else ImageEncodingConfig()
+        self.config = config if config is not None else default_config
         self._module_hash = None
         self._tensor_bucket = None
         self._output_shape = None
@@ -159,7 +146,7 @@ class ImageEncoding(
 
         # Compute and cache backbone features for any new ImageRefs:
         delete_keys = []
-        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features')
+        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable = len(compute_image_refs) == 0)
         for batch_image_refs in utils.iterate_batches(compute_image_refs, batch_size=batch_size):
             # Resolve ImageRefs into PIL.Images:
             batch_images = []

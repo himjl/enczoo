@@ -6,7 +6,7 @@ import torch
 import torchvision.models
 import torchvision.transforms.functional as F
 
-from enczoo.neural_networks.base import ImageNeuralNetwork
+from enczoo.neural_networks.base import ImageNeuralNetwork, ImageEncodingConfig
 
 
 class StandardImageLoader(torch.nn.Module):
@@ -56,6 +56,7 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             layer_name: str,
             random_projection_dim: Union[int, None] = None,
             random_projection_seed: Union[int, None] = None,
+            config: ImageEncodingConfig = None,
     ):
         if layer_name not in self.layer_names:
             raise ValueError(f'Unknown layer_name: {layer_name}. Available:\n{self.layer_names}')
@@ -72,13 +73,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             layer_name=layer_name,
             random_projection_dim=random_projection_dim,
             random_projection_seed=random_projection_seed,
+            config = config,
         )
-
-        # Ensure the model is in evaluation mode
-        #self.train(mode=False)
-        #assert self.model.training is False
-        #assert self.image_loader.training is False
-        #assert self.training is False
 
     @abstractmethod
     def _load_modules(self) -> Tuple[torch.nn.Module, torch.nn.Module]:

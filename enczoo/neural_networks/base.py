@@ -23,6 +23,9 @@ class ImageNeuralNetwork(
     ):
         super().__init__(config=config)
 
+        # Ensure modules will be registered in evaluation mode
+        self.train(mode=False)
+
         # Register buffers to ensure the model's hash is distinctive for each layer
         self.register_buffer('layer_name', torch.tensor([ord(c) for c in layer_name], dtype=torch.int16))
         self._layer_name = layer_name  # Needed for the forward pass
@@ -46,7 +49,8 @@ class ImageNeuralNetwork(
                     next_root_name = root_name + '.' + module_name if root_name != '' else module_name
                 else:
                     raise ValueError('Empty module name found in model!')
-
+                # Ensure module is in evaluation mode
+                submodule.train(mode=False)
                 # Recursive call:
                 submodule_names = register_hook(submodule, root_name=next_root_name, activations_dict=activations_dict)
 

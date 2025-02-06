@@ -1,14 +1,15 @@
 from pathlib import Path
-from typing import List
+from typing import List, Callable
 
 import PIL.Image
 import numpy as np
 import pytest
 
 import enczoo
+from enczoo.config import ImageEncodingConfig
+from pathlib import Path
 
 _dir = Path(__file__).parent
-
 
 # %%
 @pytest.fixture
@@ -24,36 +25,42 @@ def test_images() -> List[PIL.Image]:
     return images
 
 
-def test_alexnet_regresses(test_images):
-    # Spot checks the penultimate layer of AlexNet
-    test_target = np.load(_dir / 'test_targets' / 'target_alexnet_classifier5.npy')
+@pytest.mark.parametrize(
+    argnames="target_filename, model_constructor",
+    argvalues=[
+        ('target_alexnet_classifier5.npy', lambda config: enczoo.AlexNet(layer_name='classifier.5', config=config)),
+        ('target_rn50_avgpool.npy', lambda config: enczoo.ResNet50(layer_name='avgpool', config=config)),
+    ]
+)
+def test_feature_regression(
+        test_images,
+        target_filename: str,
+        model_constructor: Callable[[ImageEncodingConfig], enczoo.ImageEncoding],
+        tmpdir,
+):
 
-    enc = enczoo.AlexNet(
-        layer_name='classifier.5',
+    config = ImageEncodingConfig(
+        cachedir = Path(tmpdir)
     )
+    model = model_constructor(config)
 
-    result = enc.compute_features(
-        images=test_images,
-    )
+    # Load test target:
+    test_target = np.load(_dir / 'test_targets' / target_filename)
 
-    result = result.detach().cpu().numpy()
-    assert result.shape == test_target.shape
-    assert np.allclose(result, test_target, atol=1e-3)
+    # Run forward:
+    result = model.compute_features(images=test_images).detach().cpu().numpy()
 
+    # Run forward again:
+    result2 = model.compute_features(images=test_images).detach().cpu().numpy()
 
-def test_rn50_regresses(test_images):
-    # Spot checks the penultimate layer of ResNet50
+    # Try using load_features:
+    result3 = model.load_features(images=test_images, cache_new_features=True).detach().cpu().numpy()
+    result4 = model.load_features(images=test_images, cache_new_features=False).detach().cpu().numpy() # Cache hit
 
-    test_target = np.load(_dir / 'test_targets' / 'target_rn50_avgpool.npy')
-
-    enc = enczoo.ResNet50(
-        layer_name='avgpool',
-    )
-
-    result = enc.compute_features(
-        images=test_images,
-    )
-
-    result = result.detach().cpu().numpy()
-    assert result.shape == test_target.shape
-    assert np.allclose(result, test_target, atol=1e-3)
+    assert result.shape == result2.shape == result3.shape == result4.shape == test_target.shape
+    rtol = 1e-6
+    atol = 1e-9
+    assert np.allclose(result, test_target, rtol=rtol, atol=atol)
+    assert np.allclose(result2, test_target, rtol=rtol, atol=atol)
+    assert np.allclose(result3, test_target, rtol=rtol, atol=atol)
+    assert np.allclose(result4, test_target, rtol=rtol, atol=atol)
