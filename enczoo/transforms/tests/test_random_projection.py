@@ -5,6 +5,7 @@ import torch
 import enczoo.transforms.random_projection as random_projection_layer
 import enczoo.utils as utils
 
+
 @pytest.fixture
 def input_tensor() -> torch.Tensor:
     return torch.tensor(
@@ -39,9 +40,6 @@ def test_deterministic(input_tensor):
         seed=0,
     )
 
-    # Add a test for the module hash
-    assert utils.hash_torch_module(mod) =='e354c7db17721ab488662eac2f35f13221fd5602c51b54e8e1107b3745647ac4'# 'ba561724e99b96831fc7e3ddcad6e04504f6863aa312636791c90b0a1d11e587'
-
     # Check forward pass
     y = mod(input_tensor)
     assert torch.isclose(y[0, 0], torch.tensor(0.84718096, dtype=y.dtype), atol=1e-6)
@@ -49,3 +47,6 @@ def test_deterministic(input_tensor):
     # Should be the same result across calls
     y2 = mod(input_tensor)
     assert torch.allclose(y, y2)
+
+    # Add a test for the module hash
+    assert utils.hash_torch_module(mod) =='bc026c6061349b8dccfa92692800bff7851bd04e15c2c6fb4b00bac83e93a433'# 'ba561724e99b96831fc7e3ddcad6e04504f6863aa312636791c90b0a1d11e587'

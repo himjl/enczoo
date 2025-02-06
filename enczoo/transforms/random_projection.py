@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from typing import Tuple
-import numpy as np
+import math
+
 
 class RandomProjection(nn.Module):
     """
@@ -45,15 +46,18 @@ class RandomProjection(nn.Module):
         # Set the weights from a standard normal distribution
         gen = torch.Generator()
         gen.manual_seed(seed)
-        self.linear.weight[:] = torch.randn(
-            size=(out_features, in_features),
-            generator=gen,
-            requires_grad=False
+        self.linear.weight[:] = torch.round(
+            torch.randn(
+                size=(out_features, in_features),
+                generator=gen,
+                requires_grad=False
+            ),
+            decimals=6
         )
 
         with torch.no_grad():
             # Scale the weights
-            self.linear.weight /= np.sqrt(in_features * out_features)
+            self.linear.weight /= math.sqrt(in_features * out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x)
