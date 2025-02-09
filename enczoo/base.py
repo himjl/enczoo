@@ -13,7 +13,7 @@ from enczoo.config import ImageEncodingConfig, default_config
 
 # %%
 class ImageEncoding(
-    torch.nn.Module,
+    torch.nn.Module, # Todo: move to PyTorch-based subclass
     ABC,
 ):
     """
@@ -52,6 +52,7 @@ class ImageEncoding(
 
         return self._output_shape
 
+    # Todo: move to PyTorch-based subclass or make abstract
     @property
     def module_hash(self) -> str:
         if self.config.trainable:
