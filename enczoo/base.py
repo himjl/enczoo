@@ -71,7 +71,7 @@ class ImageEncoding(
     def tensor_bucket(self) -> Union[tensorbucket.TensorBucket, None]:
         if self.config.trainable:
             # Caching not supported for a trainable model
-            return None
+            raise ValueError('Cannot use a tensor bucket with a trainable model.')
 
         # Initialize tensor bucket (for caching)
         if self._tensor_bucket is not None:
