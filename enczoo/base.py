@@ -68,7 +68,7 @@ class ImageEncoding(
         return self._module_hash
 
     @property
-    def tensor_bucket(self) -> Union[tensorbucket.TensorBucket, None]:
+    def tensor_bucket(self) -> tensorbucket.TensorBucket:
         if self.config.trainable:
             # Caching not supported for a trainable model
             raise ValueError('Cannot use a tensor bucket with a trainable model.')
