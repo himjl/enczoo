@@ -79,7 +79,8 @@ class ImageEncoding(
 
         self._tensor_bucket = tensorbucket.TensorBucket(
             loc=self.config.cachedir / self.__class__.__name__ / (self.module_hash + '.h5'),
-            in_memory_cache_size_mb=self.config.in_memory_cache_size_mb
+            in_memory_cache_size_mb=self.config.in_memory_cache_size_mb,
+            shape=self.output_shape,
         )
         return self._tensor_bucket
 
