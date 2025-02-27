@@ -48,6 +48,6 @@ class Pixels(ImageEncoding):
 if __name__ == '__main__':
     x = Pixels()
     print(x.output_shape)
-    image = PIL.Image.fromarray(torch.zeros((256, 256, 3), dtype=torch.uint8).numpy())
+    image = PIL.Image.fromarray(torch.zeros((256, 256, 1), dtype=torch.uint8).numpy())
     feats1 = x.compute_features(images=[image])
     feats2 = x.load_features(images=[image])
