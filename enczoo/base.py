@@ -13,7 +13,7 @@ from enczoo.config import ImageEncodingConfig, default_config
 
 # %%
 class ImageEncoding(
-    torch.nn.Module, # Todo: move to PyTorch-based subclass
+    torch.nn.Module,
     ABC,
 ):
     """
@@ -52,7 +52,6 @@ class ImageEncoding(
 
         return self._output_shape
 
-    # Todo: move to PyTorch-based subclass or make abstract
     @property
     def module_hash(self) -> str:
         if self.config.trainable:
@@ -118,14 +117,14 @@ class ImageEncoding(
 
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
         image_refs = []
-        ref_to_image: Dict[mref.ImageRef, PIL.Image] = {}
+        sha256_to_image: Dict[str, PIL.Image] = {}
         for image in images:
             if isinstance(image, mref.ImageRef):
                 image_refs.append(image)
             elif isinstance(image, PIL.Image.Image):
                 image_ref = mref.ImageRef.from_image(image=image)
                 image_refs.append(image_ref)
-                ref_to_image[image_ref] = image
+                sha256_to_image[image_ref.sha256] = image
             else:
                 raise ValueError(f'Unsupported image type: {type(image)}')
 
@@ -147,8 +146,8 @@ class ImageEncoding(
             # Resolve ImageRefs into PIL.Images:
             batch_images = []
             for image_ref in batch_image_refs:
-                if image_ref in ref_to_image:
-                    batch_images.append(ref_to_image[image_ref])
+                if image_ref.sha256 in sha256_to_image:
+                    batch_images.append(sha256_to_image[image_ref.sha256])
                 else:
                     image = media_store.load_image(
                         ref=image_ref
@@ -174,7 +173,6 @@ class ImageEncoding(
 
         # Assemble return tensor:
         features = self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs])
-        features = np.stack(features, axis=0)
         features = torch.from_numpy(features)
 
         if flatten:
