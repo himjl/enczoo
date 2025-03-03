@@ -78,7 +78,6 @@ class ImageEncoding(
 
         self._tensor_bucket = tensorbucket.TensorBucket(
             loc=self.config.cachedir / self.__class__.__name__ / (self.module_hash + '.h5'),
-            in_memory_cache_size_mb=self.config.in_memory_cache_size_mb,
             shape=self.output_shape,
         )
         return self._tensor_bucket
@@ -103,6 +102,8 @@ class ImageEncoding(
 
         If any ImageRefs are given, a media_store must be provided to retrieve the images.
 
+        :param flatten:
+        :param media_store:
         :param images:
         :param cache_new_features:
         :param batch_size:
@@ -173,6 +174,7 @@ class ImageEncoding(
 
         # Assemble return tensor:
         features = self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs])
+        features = np.array(features)
         features = torch.from_numpy(features)
 
         if flatten:
