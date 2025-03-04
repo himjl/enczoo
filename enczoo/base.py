@@ -173,8 +173,7 @@ class ImageEncoding(
         pbar.close()
 
         # Assemble return tensor:
-        features = self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs])
-        features = np.array(features)
+        features = np.array(self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs]))
         features = torch.from_numpy(features)
 
         if flatten:
