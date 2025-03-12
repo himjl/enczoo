@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "enczoo"
-version = "0.0.2"
+version = "0.0.3"
 description = "A zoo of encoding models"
 authors = [
     { name = "Michael J. Lee", email = "mil@mit.edu" }
