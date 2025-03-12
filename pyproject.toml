@@ -20,7 +20,7 @@ dependencies = [
     "pydantic>=2.10",
     "torch>=2.4",
     "torchvision>=0.19",
-    "tensorbucket @ git+https://github.com/himjl/tensorbucket.git@v0.0.1",
+    "tensorbucket @ git+https://github.com/himjl/tensorbucket.git",
     "mref @ git+https://github.com/himjl/mref.git@v0.0.1",
 ]
 
