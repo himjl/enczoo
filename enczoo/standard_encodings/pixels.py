@@ -34,7 +34,7 @@ class Pixels(ImageEncoding):
 
     def _images_to_features(self, images: List[PIL.Image]) -> torch.Tensor:
         # Apply the transformations to each image
-        transformed_images = [self.transforms(image) for image in images]
+        transformed_images = [self.transforms(image.convert("RGB")) for image in images]
 
         # Stack the transformed images into a single tensor
         images_tensor = torch.stack(transformed_images)
@@ -43,11 +43,3 @@ class Pixels(ImageEncoding):
         images_tensor = images_tensor.permute(0, 2, 3, 1)
 
         return images_tensor
-
-
-if __name__ == '__main__':
-    x = Pixels()
-    print(x.output_shape)
-    image = PIL.Image.fromarray(torch.zeros((256, 256, 3), dtype=torch.uint8).numpy())
-    feats1 = x.compute_features(images=[image])
-    feats2 = x.load_features(images=[image])

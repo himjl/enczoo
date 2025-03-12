@@ -53,9 +53,9 @@ class ImageEncoding(
         return self._output_shape
 
     @property
-    def module_hash(self) -> Union[str, None]:
+    def module_hash(self) -> str:
         if self.config.trainable:
-            return None
+            raise ValueError('Cannot hash a trainable model.')
 
         # Turn off gradients for all parameters
         for param in self.parameters():
@@ -67,10 +67,10 @@ class ImageEncoding(
         return self._module_hash
 
     @property
-    def tensor_bucket(self) -> Union[tensorbucket.TensorBucket, None]:
+    def tensor_bucket(self) -> tensorbucket.TensorBucket:
         if self.config.trainable:
             # Caching not supported for a trainable model
-            return None
+            raise ValueError('Cannot use a tensor bucket with a trainable model.')
 
         # Initialize tensor bucket (for caching)
         if self._tensor_bucket is not None:
@@ -78,7 +78,7 @@ class ImageEncoding(
 
         self._tensor_bucket = tensorbucket.TensorBucket(
             loc=self.config.cachedir / self.__class__.__name__ / (self.module_hash + '.h5'),
-            in_memory_cache_size_mb=self.config.in_memory_cache_size_mb
+            shape=self.output_shape,
         )
         return self._tensor_bucket
 
@@ -102,6 +102,8 @@ class ImageEncoding(
 
         If any ImageRefs are given, a media_store must be provided to retrieve the images.
 
+        :param flatten:
+        :param media_store:
         :param images:
         :param cache_new_features:
         :param batch_size:
@@ -111,16 +113,19 @@ class ImageEncoding(
         if self.config.trainable and cache_new_features:
             raise ValueError('Cannot cache new features unless the model has self.config.trainable=False.')
 
+        if batch_size < 1:
+            raise ValueError(f'batch_size must be at least 1, but got {batch_size}.')
+
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
         image_refs = []
-        ref_to_image: Dict[mref.ImageRef, PIL.Image] = {}
+        sha256_to_image: Dict[str, PIL.Image] = {}
         for image in images:
             if isinstance(image, mref.ImageRef):
                 image_refs.append(image)
             elif isinstance(image, PIL.Image.Image):
                 image_ref = mref.ImageRef.from_image(image=image)
                 image_refs.append(image_ref)
-                ref_to_image[image_ref] = image
+                sha256_to_image[image_ref.sha256] = image
             else:
                 raise ValueError(f'Unsupported image type: {type(image)}')
 
@@ -136,13 +141,14 @@ class ImageEncoding(
 
         # Compute and cache backbone features for any new ImageRefs:
         delete_keys = []
-        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable=len(compute_image_refs) == 0)
+        ncompute_images = len(compute_image_refs)
+        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable=ncompute_images <= batch_size)
         for batch_image_refs in utils.iterate_batches(compute_image_refs, batch_size=batch_size):
             # Resolve ImageRefs into PIL.Images:
             batch_images = []
             for image_ref in batch_image_refs:
-                if image_ref in ref_to_image:
-                    batch_images.append(ref_to_image[image_ref])
+                if image_ref.sha256 in sha256_to_image:
+                    batch_images.append(sha256_to_image[image_ref.sha256])
                 else:
                     image = media_store.load_image(
                         ref=image_ref
@@ -167,8 +173,7 @@ class ImageEncoding(
         pbar.close()
 
         # Assemble return tensor:
-        features = self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs])
-        features = np.stack(features, axis=0)
+        features = np.array(self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs]))
         features = torch.from_numpy(features)
 
         if flatten:

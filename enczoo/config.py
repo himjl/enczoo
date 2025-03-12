@@ -16,11 +16,8 @@ class ImageEncodingConfig(pydantic.BaseModel):
     )
 
     cachedir: Path = pydantic.Field(
+        default=Path.home() / 'enczoo_cache',
         description='The directory where the cache is stored. Note if trainable=True, the cache is disabled.'
-    )
-    in_memory_cache_size_mb: int = pydantic.Field(
-        default=256,
-        description='The size of the in-memory cache in MB. Irrelevant if trainable=True.'
     )
 
     default_batch_size: int = pydantic.Field(
@@ -29,9 +26,4 @@ class ImageEncodingConfig(pydantic.BaseModel):
     )
 
 
-default_config = ImageEncodingConfig(
-    trainable=False,
-    cachedir=Path.home() / 'enczoo_cache',
-    in_memory_cache_size_mb=256,
-    default_batch_size=32
-)
+default_config = ImageEncodingConfig()
