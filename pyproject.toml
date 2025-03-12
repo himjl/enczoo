@@ -21,7 +21,7 @@ dependencies = [
     "torch>=2.4",
     "torchvision>=0.19",
     "tensorbucket @ git+https://github.com/himjl/tensorbucket.git",
-    "mref @ git+https://github.com/himjl/mref.git@v0.0.1",
+    "mref @ git+https://github.com/himjl/mref.git",
 ]
 
 [project.urls]
