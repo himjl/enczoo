@@ -35,6 +35,21 @@ class ImageEncoding(
         self.train(mode=self.config.trainable)
 
     @property
+    def device(self) -> torch.device:
+        """
+        A convenience method which infers the device of the first parameter or buffer.
+        Note this assumes that all parameters and buffers are on the same device.
+        :return: the device of the first parameter or buffer, or 'cpu' if none exist.
+        """
+        try:
+            return next(self.parameters()).device
+        except StopIteration:
+            try:
+                return next(self.buffers()).device
+            except StopIteration:
+                return torch.device('cpu')
+
+    @property
     def output_shape(self) -> Tuple[int, ...]:
         if self._output_shape is None:
             test_image = PIL.Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
