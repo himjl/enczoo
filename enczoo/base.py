@@ -38,7 +38,7 @@ class ImageEncoding(
     def device(self) -> torch.device:
         """
         A convenience method which infers the device of the first parameter or buffer.
-        Not this assumes that all parameters and buffers are on the same device.
+        Note this assumes that all parameters and buffers are on the same device.
         :return: the device of the first parameter or buffer, or 'cpu' if none exist.
         """
         try:
