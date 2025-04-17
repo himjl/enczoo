@@ -119,6 +119,9 @@ class ImageNeuralNetwork(
         # Preprocess the images
         preprocessed_images = torch.stack([self.image_loader(image) for image in images], dim=0)
 
+        # Transfer to the correct device
+        preprocessed_images = preprocessed_images.to(self.device)
+
         # Run the forward pass
         self.model(preprocessed_images)
 
