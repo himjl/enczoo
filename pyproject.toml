@@ -18,7 +18,7 @@ dependencies = [
     "pytest>=8.3",
     "pillow>=10.4",
     "pydantic>=2.10",
-    "torch>=2.4",
+    "torch>=2.2",
     "torchvision>=0.19",
     "tensorbucket @ git+https://github.com/himjl/tensorbucket.git",
     "mref @ git+https://github.com/himjl/mref.git",
