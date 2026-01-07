@@ -82,31 +82,14 @@ def test_feature_regression(
     # Run forward again:
     result2 = model.compute_features(images=test_images).detach().cpu().numpy()
 
-    # Try using load_features:
-    result3 = (
-        model.load_features(images=test_images, cache_new_features=True)
-        .detach()
-        .cpu()
-        .numpy()
-    )
-    result4 = (
-        model.load_features(images=test_images, cache_new_features=False)
-        .detach()
-        .cpu()
-        .numpy()
-    )  # Cache hit
 
     print(np.max(np.abs(result - test_target)))
     assert (
         result.shape
         == result2.shape
-        == result3.shape
-        == result4.shape
         == test_target.shape
     )
     rtol = 1e-3
     atol = 1e-5
     assert np.allclose(result, test_target, rtol=rtol, atol=atol)
     assert np.allclose(result2, test_target, rtol=rtol, atol=atol)
-    assert np.allclose(result3, test_target, rtol=rtol, atol=atol)
-    assert np.allclose(result4, test_target, rtol=rtol, atol=atol)

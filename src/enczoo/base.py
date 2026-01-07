@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple, Union
 
-import enczoo.mref as mref
-import numpy as np
 import PIL.Image
-import enczoo.tensorbucket as tensorbucket
+import numpy as np
 import torch
-from tqdm import tqdm
 
 import enczoo.utils as utils
 from enczoo.config import ImageEncodingConfig, default_config
@@ -87,149 +84,6 @@ class ImageEncoding(
         if self._module_hash is None:
             self._module_hash = utils.hash_torch_module(module=self)
         return self._module_hash
-
-    @property
-    def tensor_bucket(self) -> tensorbucket.TensorBucket:
-        if self.config.trainable:
-            # Caching not supported for a trainable model
-            raise ValueError("Cannot use a tensor bucket with a trainable model.")
-
-        # Initialize tensor bucket (for caching)
-        if self._tensor_bucket is not None:
-            return self._tensor_bucket
-
-        self._tensor_bucket = tensorbucket.TensorBucket(
-            loc=self.config.cachedir
-            / self.__class__.__name__
-            / (self.module_hash + ".h5"),
-            shape=self.output_shape,
-        )
-        return self._tensor_bucket
-
-    @torch.no_grad()
-    def load_features(
-        self,
-        images: List[Union[PIL.Image.Image, mref.ImageRef]],
-        flatten: bool = False,
-        media_store: mref.Storage | None = None,
-        cache_new_features: bool = True,
-        batch_size: int = 32,
-    ) -> torch.Tensor:
-        """
-        A convenience method which loads the features for a list of images from a cache.
-        Unlike self.__call__(), this method does not track gradients.
-
-        Features for images not in the cache are computed using self.__call__, and cached,
-        if cache_new_features=True and self.config.trainable=False.
-
-        When new features are computed, this method performs image batching to avoid memory issues.
-
-        If any ImageRefs are given, a media_store must be provided to retrieve the images.
-
-        :param flatten:
-        :param media_store:
-        :param images:
-        :param cache_new_features:
-        :param batch_size:
-        :return:
-        """
-
-        if self.config.trainable and cache_new_features:
-            raise ValueError(
-                "Cannot cache new features unless the model has self.config.trainable=False."
-            )
-
-        if batch_size < 1:
-            raise ValueError(f"batch_size must be at least 1, but got {batch_size}.")
-
-        # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
-        requires_media_store = any(isinstance(image, mref.ImageRef) for image in images)
-        if requires_media_store and media_store is None:
-            raise ValueError(
-                "media_store must be provided when images include ImageRefs."
-            )
-
-        image_refs = []
-        sha256_to_image: Dict[str, PIL.Image.Image] = {}
-        for image in images:
-            if isinstance(image, mref.ImageRef):
-                image_refs.append(image)
-            elif isinstance(image, PIL.Image.Image):
-                image_ref = mref.ImageRef.from_image(image=image)
-                image_refs.append(image_ref)
-                sha256_to_image[image_ref.sha256] = image
-            else:
-                raise ValueError(f"Unsupported image type: {type(image)}")
-
-        tensor_already_cached_mask: List[bool] = self.tensor_bucket.check_keys_exist(
-            keys=[v.sha256 for v in image_refs]
-        )
-
-        # Collect ImageRefs for which new features must be computed
-        compute_image_refs: List[mref.ImageRef] = []
-        for already_cached, ref in zip(tensor_already_cached_mask, image_refs):
-            if not already_cached:
-                compute_image_refs.append(ref)
-
-        compute_image_refs = sorted(set(compute_image_refs))
-
-        # Compute and cache backbone features for any new ImageRefs:
-        delete_keys = []
-        ncompute_images = len(compute_image_refs)
-        pbar = tqdm(
-            total=len(compute_image_refs),
-            desc="Computing image features",
-            disable=ncompute_images <= batch_size,
-        )
-        for batch_image_refs in utils.iterate_batches(
-            compute_image_refs, batch_size=batch_size
-        ):
-            # Resolve ImageRefs into PIL.Image.Images:
-            if requires_media_store:
-                assert media_store is not None
-            batch_images = []
-            for image_ref in batch_image_refs:
-                if image_ref.sha256 in sha256_to_image:
-                    batch_images.append(sha256_to_image[image_ref.sha256])
-                else:
-                    assert media_store is not None
-                    image = media_store.load_image(ref=image_ref)
-                    batch_images.append(image)
-
-            # Run forward pass:
-            batch_features = self.compute_features(images=batch_images, flatten=False)
-            batch_backbone_features = batch_features.detach().cpu().numpy()
-
-            # Cache the backbone features in the store, possibly temporarily
-            key_to_tensor = {
-                image_ref.sha256: tensor
-                for image_ref, tensor in zip(batch_image_refs, batch_backbone_features)
-            }
-            self.tensor_bucket.store_tensors(
-                key_to_tensor=key_to_tensor,
-                overwrite_if_exists=False,
-            )
-
-            if not cache_new_features:
-                delete_keys += [v.sha256 for v in batch_image_refs]
-
-            pbar.update(len(batch_image_refs))
-        pbar.close()
-
-        # Assemble return tensor:
-        features = np.array(
-            self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs])
-        )
-        features = torch.from_numpy(features)
-
-        if flatten:
-            features = features.reshape(features.shape[0], -1)
-
-        # Delete any newly created keys from the tensor_bucket if caching was not requested
-        if not cache_new_features:
-            self.tensor_bucket.delete_tensors(keys=delete_keys)
-
-        return features
 
     def compute_features(
         self,
