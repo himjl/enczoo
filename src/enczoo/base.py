@@ -1,13 +1,14 @@
-import PIL.Image
-import numpy as np
-import torch
 from abc import ABC, abstractmethod
+from typing import Dict, List, Tuple, Union
+
+import mref
+import numpy as np
+import PIL.Image
+import tensorbucket
+import torch
 from tqdm import tqdm
-from typing import List, Tuple, Union, Dict
 
 import enczoo.utils as utils
-import mref
-import tensorbucket
 from enczoo.config import ImageEncodingConfig, default_config
 
 

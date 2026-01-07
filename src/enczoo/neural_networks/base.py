@@ -1,9 +1,10 @@
-import PIL.Image
+from abc import ABC
+from typing import Dict, List, Tuple, Union
+
 import numpy as np
+import PIL.Image
 import torch
 import torchvision
-from abc import ABC
-from typing import Union, Dict, List, Tuple
 
 from enczoo.base import ImageEncoding, ImageEncodingConfig
 from enczoo.transforms.random_projection import RandomProjection

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Union, Dict, Tuple
+from typing import Dict, List, Tuple, Union
 
 import h5py
 import numpy as np

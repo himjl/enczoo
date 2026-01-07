@@ -4,7 +4,7 @@ from typing import Any
 
 import PIL.Image
 
-from enczoo.mref.media_references import MediaRef, ImageRef, JsonRef, ZipRef
+from enczoo.mref.media_references import ImageRef, JsonRef, MediaRef, ZipRef
 
 
 # %%
