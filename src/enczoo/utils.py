@@ -1,12 +1,25 @@
 import hashlib
 import itertools
-import torch
 from typing import Iterable, Iterator, List, TypeVar
 
-T = TypeVar('T')
+import torch
+
+T = TypeVar("T")
 
 
 def iterate_batches(iterable: Iterable[T], batch_size: int) -> Iterator[List[T]]:
+    """Yield items from an iterable in fixed-size batches.
+
+    Args:
+        iterable: Source iterable to batch.
+        batch_size: Number of items per batch.
+
+    Yields:
+        Lists of up to batch_size elements.
+
+    Raises:
+        ValueError: If batch_size is less than 1.
+    """
     if batch_size < 1:
         raise ValueError("Batch size must be at least 1!")
 
@@ -19,13 +32,15 @@ def iterate_batches(iterable: Iterable[T], batch_size: int) -> Iterator[List[T]]
 
 
 def hash_torch_module(module: torch.nn.Module) -> str:
-    """
-    Returns a hash of a torch.nn.Module. The hash function depends on:
-    - The model's state_dict
-    - The model's string representation
+    """Return a hash for a torch.nn.Module.
 
-    :param module:
-    :return:
+    The hash depends on the module's state_dict and string representation.
+
+    Args:
+        module: Module to hash.
+
+    Returns:
+        Hex-encoded SHA-256 hash.
     """
 
     sha256_hash = hashlib.sha256()
@@ -38,7 +53,7 @@ def hash_torch_module(module: torch.nn.Module) -> str:
 
     # Hash the module's string representation:
     module_string = str(module)
-    module_string = module_string.encode('utf-8')
+    module_string = module_string.encode("utf-8")
     sha256_hash.update(module_string)
 
     # Return the combined hash:
