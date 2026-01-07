@@ -2,13 +2,14 @@
 
 ## Project goal
 
-enczoo is a stateless **library** with a single, simple goal: to get intermediate representations of common, off-the-shelf DNNs as np.ndarrays, given PIL.Images. 
+enczoo is a stateless **library** with a single, simple goal: to compute intermediate representations from common, off-the-shelf vision models as np.ndarrays, given PIL.Images. 
 Though it primarily uses torch based models, it's not really tied to PyTorch: the core functionality of enczoo is PIL.Image -> np.ndarray.  
 
 ### What enczoo should do
 * `enczoo` should just work. 
-* `enczoo` should handle annoying gotchas, such as model-specific image normalization, dtypes, batching, etc.
+* `enczoo` should handle annoying gotchas, such as model-specific image normalization, dtypes, batching, randomness etc.
 * `enczoo` should and have good (but overridable) defaults for many things, like image cropping, and dimensionality reduction.
+* `enczoo` should be _deterministic_ (ish), to some epsilon, for any given version. 
 
 ### What enczoo does not do
 * `enczoo` is not meant to be used as components of a larger machine learning graph; it really is for off-the-shelf image representations only. So it doesn't support autograd, or anything like that. 
