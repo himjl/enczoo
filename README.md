@@ -4,6 +4,7 @@
 
 `enczoo` is a Python library with a single goal: to map images (as `PIL.Images`) to intermediate representations (as `np.ndarray`) from off-the-shelf vision models, such as AlexNet and ResNet50.
 
+This library is meant for those who just need to compute off-the-shelf image features once for their project (and perhaps cache them elsewhere).
 
 ### Installation
 
@@ -28,9 +29,3 @@
 * dimensionality reduction, for gigantic feature spaces that (default: seeded [random projection](https://en.wikipedia.org/wiki/Johnson–Lindenstrauss_lemma))
 
 
-
-### What `enczoo` does not do: 
-* `enczoo` is not really optimized for performance (though it does its best). 
- * `enczoo` does not offer autograd capabilities or integrate with torch/tensorflow (its only job is to return `np.ndarray` from `PIL.Image`, after all). 
-
-This library is best used for those who just need to compute off-the-shelf image features once for their project (and perhaps cache them elsewhere).

@@ -1,9 +1,10 @@
+from typing import List
+
 import PIL.Image
 import torch
 import torchvision.transforms.v2 as v2
-from typing import List
 
-from enczoo.base import ImageEncoding, ImageEncodingConfig
+from enczoo.base import ImageEncoding
 from enczoo.transforms.random_projection import RandomProjection
 
 
@@ -18,9 +19,8 @@ class Pixels(ImageEncoding):
         size: int = 16,
         random_projection_dim: int | None = None,
         random_projection_seed: int | None = None,
-        config: ImageEncodingConfig | None = None,
     ):
-        super().__init__(config=config)
+        super().__init__()
 
         # Register size tensor as buffer
         self.register_buffer(

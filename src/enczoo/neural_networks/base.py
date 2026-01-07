@@ -1,12 +1,12 @@
 from abc import ABC
 from typing import Dict, List, Tuple
 
-import numpy as np
 import PIL.Image
+import numpy as np
 import torch
 import torchvision
 
-from enczoo.base import ImageEncoding, ImageEncodingConfig
+from enczoo.base import ImageEncoding
 from enczoo.transforms.random_projection import RandomProjection
 
 
@@ -18,9 +18,8 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         layer_name: str,
         random_projection_dim: int | None,
         random_projection_seed: int | None,
-        config: ImageEncodingConfig | None = None,
     ):
-        super().__init__(config=config)
+        super().__init__()
 
         # Ensure modules will be registered in evaluation mode
         self.train(mode=False)

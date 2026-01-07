@@ -1,11 +1,12 @@
+from abc import ABC, abstractmethod
+from typing import List, Tuple
+
 import PIL.Image
 import torch
 import torchvision.models
 import torchvision.transforms.functional as F
-from abc import ABC, abstractmethod
-from typing import List, Tuple
 
-from enczoo.neural_networks.base import ImageNeuralNetwork, ImageEncodingConfig
+from enczoo.neural_networks.base import ImageNeuralNetwork
 
 
 class StandardImageLoader(torch.nn.Module):
@@ -49,7 +50,6 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
         layer_name: str,
         random_projection_dim: int | None = None,
         random_projection_seed: int | None = None,
-        config: ImageEncodingConfig | None = None,
     ):
         if layer_name not in self.layer_names:
             raise ValueError(
@@ -68,7 +68,6 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             layer_name=layer_name,
             random_projection_dim=random_projection_dim,
             random_projection_seed=random_projection_seed,
-            config=config,
         )
 
     @abstractmethod

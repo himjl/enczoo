@@ -1,7 +1,8 @@
 import hashlib
 import itertools
-import torch
 from typing import Iterable, Iterator, List, TypeVar
+
+import torch
 
 T = TypeVar("T")
 

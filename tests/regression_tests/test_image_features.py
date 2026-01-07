@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import List, Callable
 
 import enczoo
-from enczoo import ImageEncodingConfig
 
 _dir = Path(__file__).parent
 
@@ -29,35 +28,32 @@ def test_images() -> List[PIL.Image.Image]:
     argvalues=[
         (
             "target_alexnet_classifier5.npy",
-            lambda config: enczoo.AlexNet(layer_name="classifier.5", config=config),
+            lambda: enczoo.AlexNet(layer_name="classifier.5"),
         ),
         (
             "target_rn50_avgpool.npy",
-            lambda config: enczoo.ResNet50(layer_name="avgpool", config=config),
+            lambda: enczoo.ResNet50(layer_name="avgpool"),
         ),
         (
             "target_rn50_avgpool_proj20_seed0.npy",
-            lambda config: enczoo.ResNet50(
+            lambda: enczoo.ResNet50(
                 layer_name="avgpool",
-                config=config,
                 random_projection_dim=20,
                 random_projection_seed=0,
             ),
         ),
         (
             "target_rn50_avgpool_proj1000_seed0.npy",
-            lambda config: enczoo.ResNet50(
+            lambda: enczoo.ResNet50(
                 layer_name="avgpool",
-                config=config,
                 random_projection_dim=1000,
                 random_projection_seed=0,
             ),
         ),
         (
             "target_rn50_avgpool_proj1000_seed1.npy",
-            lambda config: enczoo.ResNet50(
+            lambda: enczoo.ResNet50(
                 layer_name="avgpool",
-                config=config,
                 random_projection_dim=1000,
                 random_projection_seed=1,
             ),
@@ -67,11 +63,9 @@ def test_images() -> List[PIL.Image.Image]:
 def test_feature_regression(
     test_images,
     target_filename: str,
-    model_constructor: Callable[[ImageEncodingConfig], enczoo.ImageEncoding],
-    tmpdir,
+    model_constructor: Callable[[], enczoo.ImageEncoding],
 ):
-    config = ImageEncodingConfig(cachedir=Path(tmpdir))
-    model = model_constructor(config)
+    model = model_constructor()
 
     # Load test target:
     test_target = np.load(_dir / "test_targets" / target_filename)

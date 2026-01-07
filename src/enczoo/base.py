@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import PIL.Image
 import numpy as np
 import torch
 
 import enczoo.utils as utils
-from enczoo.config import ImageEncodingConfig, default_config
 
 
 # %%
@@ -21,18 +20,16 @@ class ImageEncoding(
 
     def __init__(
         self,
-        config: Union[ImageEncodingConfig, None],
+        trainable: bool = False,
     ):
         super().__init__()
-        self.config: ImageEncodingConfig = (
-            config if config is not None else default_config
-        )
+        self.trainable = trainable
         self._module_hash = None
         self._tensor_bucket = None
         self._output_shape = None
 
         # Set the module's mode
-        self.train(mode=self.config.trainable)
+        self.train(mode=trainable)
 
     @property
     def device(self) -> torch.device:
@@ -73,7 +70,7 @@ class ImageEncoding(
 
     @property
     def module_hash(self) -> str:
-        if self.config.trainable:
+        if self.trainable:
             raise ValueError("Cannot hash a trainable model.")
 
         # Turn off gradients for all parameters

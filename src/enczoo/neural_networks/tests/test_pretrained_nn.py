@@ -1,8 +1,9 @@
+from typing import List
+
 import PIL.Image
 import numpy as np
 import pytest
 import torch
-from typing import List
 
 from enczoo import AlexNet
 
