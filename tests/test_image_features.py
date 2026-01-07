@@ -71,10 +71,10 @@ def test_feature_regression(
     test_target = np.load(_dir / "test_targets" / target_filename)
 
     # Run forward:
-    result = model.compute_features(images=test_images).detach().cpu().numpy()
+    result = model.compute_features(images=test_images)
 
     # Run forward again:
-    result2 = model.compute_features(images=test_images).detach().cpu().numpy()
+    result2 = model.compute_features(images=test_images)
 
     print(np.max(np.abs(result - test_target)))
     assert result.shape == result2.shape == test_target.shape

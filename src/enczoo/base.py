@@ -86,7 +86,7 @@ class ImageEncoding(
         self,
         images: List[PIL.Image.Image],
         flatten: bool = False,
-    ) -> torch.Tensor:
+    ) -> np.ndarray:
         """
         Just an alias for __call__, to allow for type hinting by IDEs
         (PyCharm does not recognize __call__ signature of torch.nn.Modules, for some reason).
@@ -94,7 +94,11 @@ class ImageEncoding(
         :param flatten: if True, flattens the output tensor to [B, d].
         :return: a torch.Tensor of shape [B, *]. If flatten=True, returns [B, d] instead.
         """
-        return self(images=images, flatten=flatten)
+
+        with torch.no_grad():
+            torch_features: torch.Tensor = self(images=images, flatten=flatten)
+            numpy_features = torch_features.detach().cpu().numpy()
+        return numpy_features
 
     def forward(
         self,
