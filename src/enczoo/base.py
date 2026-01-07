@@ -86,6 +86,7 @@ class ImageEncoding(
         self,
         images: List[PIL.Image.Image],
         flatten: bool = False,
+        seed: int | None = None,
     ) -> np.ndarray:
         """
         Just an alias for __call__, to allow for type hinting by IDEs
@@ -95,9 +96,14 @@ class ImageEncoding(
         :return: a torch.Tensor of shape [B, *]. If flatten=True, returns [B, d] instead.
         """
 
-        with torch.no_grad():
-            torch_features: torch.Tensor = self(images=images, flatten=flatten)
-            numpy_features = torch_features.detach().cpu().numpy()
+        with torch.random.fork_rng():
+            if seed is not None:
+                torch.manual_seed(seed)
+                if torch.cuda.is_available():
+                    torch.cuda.manual_seed_all(seed)
+            with torch.no_grad():
+                torch_features: torch.Tensor = self(images=images, flatten=flatten)
+                numpy_features = torch_features.detach().cpu().numpy()
         return numpy_features
 
     def forward(
