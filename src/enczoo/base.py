@@ -13,15 +13,21 @@ class ImageEncoding(
     torch.nn.Module,
     ABC,
 ):
-    """
-    torch.nn.Module which executes a mapping from B-length lists of PIL.Image.Images to [B, *] float tensors.
-    Its parameters do not aggregate gradients.
+    """Map PIL images to batched float tensors.
+
+    This module maps B-length lists of PIL.Image.Image to float tensors shaped
+    [B, *]. Parameters do not aggregate gradients by default.
     """
 
     def __init__(
         self,
         trainable: bool = False,
     ):
+        """Initialize the encoder.
+
+        Args:
+            trainable: If True, the module is put in train mode.
+        """
         super().__init__()
         self.trainable = trainable
         self._module_hash = None
@@ -33,10 +39,10 @@ class ImageEncoding(
 
     @property
     def device(self) -> torch.device:
-        """
-        A convenience method which infers the device of the first parameter or buffer.
-        Note this assumes that all parameters and buffers are on the same device.
-        :return: the device of the first parameter or buffer, or 'cpu' if none exist.
+        """Infer the device from the first parameter or buffer.
+
+        Returns:
+            The device of the first parameter or buffer, or CPU if none exist.
         """
         try:
             return next(self.parameters()).device
@@ -48,6 +54,7 @@ class ImageEncoding(
 
     @property
     def output_shape(self) -> Tuple[int, ...]:
+        """Return the output feature shape (excluding batch dimension)."""
         if self._output_shape is None:
             test_image = PIL.Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
             test_result = self.compute_features(images=[test_image], flatten=False)
@@ -70,6 +77,7 @@ class ImageEncoding(
 
     @property
     def module_hash(self) -> str:
+        """Return a stable hash for the module's parameters and structure."""
         if self.trainable:
             raise ValueError("Cannot hash a trainable model.")
 
@@ -88,12 +96,21 @@ class ImageEncoding(
         flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
-        """
-        Just an alias for __call__, to allow for type hinting by IDEs
-        (PyCharm does not recognize __call__ signature of torch.nn.Modules, for some reason).
-        :param images: a B length list of PIL.Image.Images.
-        :param flatten: if True, flattens the output tensor to [B, d].
-        :return: a torch.Tensor of shape [B, *]. If flatten=True, returns [B, d] instead.
+        """Compute features and return them as a NumPy array.
+
+        This is an alias for __call__ to help IDEs that do not recognize the
+        torch.nn.Module __call__ signature.
+
+        Args:
+            images: A B-length list of PIL.Image.Image.
+            flatten: If True, flatten the output to [B, d].
+            seed: Optional RNG seed for deterministic results.
+
+        Returns:
+            A NumPy array of shape [B, *], or [B, d] if flatten=True.
+
+        Raises:
+            ValueError: If the input images are invalid.
         """
 
         with torch.random.fork_rng():
@@ -111,10 +128,17 @@ class ImageEncoding(
         images: List[PIL.Image.Image],
         flatten: bool = False,
     ) -> torch.Tensor:
-        """
-        :param images: a B length list of PIL.Image.Images.
-        :param flatten: if True, flattens the output tensor to [B, d].
-        :return: a torch.Tensor of shape [B, *]
+        """Compute features for a batch of images.
+
+        Args:
+            images: A B-length list of PIL.Image.Image.
+            flatten: If True, flatten the output to [B, d].
+
+        Returns:
+            A torch.Tensor of shape [B, *].
+
+        Raises:
+            ValueError: If the images list is empty or not image objects.
         """
         if not isinstance(images, list):
             raise ValueError(
@@ -137,8 +161,12 @@ class ImageEncoding(
 
     @abstractmethod
     def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
-        """
-        :param images: a list of PIL.Image.Images
-        :return: a torch.Tensor of shape [B, *]
+        """Convert images to features.
+
+        Args:
+            images: A list of PIL.Image.Image.
+
+        Returns:
+            A torch.Tensor of shape [B, *].
         """
         raise NotImplementedError

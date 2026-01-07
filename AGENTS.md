@@ -32,6 +32,7 @@ enczoo is a stateless **library** with a single, simple goal: to compute interme
 - Python 3.12+, 4-space indentation, standard PEP 8 naming.
 - Modules/functions/variables use `snake_case`; classes use `CamelCase`.
 - Formatting and linting are enforced by `ruff format` and `ruff check`; type checks use `ty`.
+- Google style docstrings.
 
 ## Testing Guidelines
 - Test framework: `pytest`.

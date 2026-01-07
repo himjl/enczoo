@@ -11,6 +11,8 @@ from enczoo.transforms.random_projection import RandomProjection
 
 
 class ImageNeuralNetwork(ImageEncoding, ABC):
+    """Image encoding backed by a torch neural network."""
+
     def __init__(
         self,
         image_loader: torch.nn.Module | torchvision.transforms.Compose,
@@ -19,6 +21,18 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         random_projection_dim: int | None,
         random_projection_seed: int | None,
     ):
+        """Initialize the neural network encoder.
+
+        Args:
+            image_loader: Module that converts PIL images to model inputs.
+            model: Torch model used to compute activations.
+            layer_name: Name of the layer whose activations are returned.
+            random_projection_dim: Optional output dimension for projection.
+            random_projection_seed: Seed for projection weights.
+
+        Raises:
+            ValueError: If the layer name is not found.
+        """
         super().__init__()
 
         # Ensure modules will be registered in evaluation mode
@@ -35,11 +49,15 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
             root_name: str,
             activations_dict: Dict[str, torch.Tensor],
         ) -> List[str]:
-            """
-            Recursively registers the forward hook on all children of a module.
-            :param module:
-            :param root_name:
-            :return: a list of layer names, in the order they were discovered.
+            """Recursively register forward hooks on leaf modules.
+
+            Args:
+                module: Module whose children are walked.
+                root_name: Prefix for module names.
+                activations_dict: Dict populated with layer activations.
+
+            Returns:
+                A list of layer names in discovery order.
             """
             module_names = []
 
@@ -127,9 +145,13 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
             self.random_projection = None
 
     def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
-        """
-        :param images: a list of PIL.Image.Images
-        :return: a torch.Tensor of shape [B, *]
+        """Convert images to network activations.
+
+        Args:
+            images: A list of PIL.Image.Image.
+
+        Returns:
+            A torch.Tensor of shape [B, *].
         """
 
         # Preprocess the images
@@ -158,7 +180,5 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
 
     @property
     def layer_name_to_shape(self) -> Dict[str, Tuple[int, ...]]:
-        """
-        :return: a dictionary mapping layer names to the number of features in the layer.
-        """
+        """Return a mapping of layer names to activation shapes."""
         return self._layer_to_shape

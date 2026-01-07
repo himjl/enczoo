@@ -10,9 +10,7 @@ from enczoo.transforms.random_projection import RandomProjection
 
 # %%
 class Pixels(ImageEncoding):
-    """
-    This ImageEncoding simply takes the center crop of an image and resizes it to (size x size x 3).
-    """
+    """Encode images by their resized center-crop pixels."""
 
     def __init__(
         self,
@@ -20,6 +18,13 @@ class Pixels(ImageEncoding):
         random_projection_dim: int | None = None,
         random_projection_seed: int | None = None,
     ):
+        """Initialize the pixel encoder.
+
+        Args:
+            size: Output side length in pixels.
+            random_projection_dim: Optional output dimension for projection.
+            random_projection_seed: Seed for projection weights.
+        """
         super().__init__()
 
         # Register size tensor as buffer
@@ -59,6 +64,14 @@ class Pixels(ImageEncoding):
             self.random_projection = None
 
     def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
+        """Convert images to pixel features.
+
+        Args:
+            images: A list of PIL.Image.Image.
+
+        Returns:
+            A torch.Tensor of shape [B, size, size, 3] or projected features.
+        """
         # Apply the transformations to each image
         transformed_images = [self.transforms(image.convert("RGB")) for image in images]
 

@@ -1,5 +1,5 @@
 import math
-from typing import Tuple
+from typing import Tuple, cast
 
 import torch
 import torch.nn as nn
@@ -7,10 +7,7 @@ import torch.nn.functional as F
 
 
 class RandomProjection(nn.Module):
-    """
-    A torch.nn.Module which efficiently performs a random projection on an incoming
-    tensor layer.
-    """
+    """Apply a fixed random projection to an input tensor."""
 
     def __init__(
         self,
@@ -18,11 +15,12 @@ class RandomProjection(nn.Module):
         out_features: int,
         seed: int,
     ):
-        """
-        :param input_shape: The shape of the input tensor, not including the batch dimension.
-        :param output_shape: The shape of the output tensor, not including the batch dimension.
-        :param seed: The seed for the random projection.
-        :param max_projection_floats: The maximum number of projection weights which may be held in memory at once.
+        """Initialize the random projection.
+
+        Args:
+            in_features: Input feature dimension.
+            out_features: Output feature dimension.
+            seed: Seed for the random projection weights.
         """
 
         super().__init__()
@@ -53,11 +51,23 @@ class RandomProjection(nn.Module):
         self.register_buffer("projection_weights", weights)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return F.linear(x, self.projection_weights)
+        """Project input features with a fixed random matrix.
+
+        Args:
+            x: Input tensor of shape [B, in_features].
+
+        Returns:
+            Projected tensor of shape [B, out_features].
+        """
+        weights = cast(torch.Tensor, self.projection_weights)
+        return F.linear(x, weights)
 
     def __repr__(self):
+        """Return a concise representation for debugging."""
         return f"RandomProjection(in_features={self.in_features}, out_features={self.out_features}, seed={self.seed})"
 
     @property
     def output_shape(self) -> Tuple[int]:
-        return (self.projection_weights.shape[0],)
+        """Return the output feature shape (excluding batch dimension)."""
+        weights = cast(torch.Tensor, self.projection_weights)
+        return (weights.shape[0],)

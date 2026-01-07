@@ -10,22 +10,25 @@ from enczoo.neural_networks.base import ImageNeuralNetwork
 
 
 class StandardImageLoader(torch.nn.Module):
-    """
-    A variant of the image loader used for many torchvision models. However, this
-    variant does not necessarily "chop" the image margins. That is, this
-    image loader results in the largest square sub-image (unlike the standard image loader, which returns a proportionally smaller sub-image).
+    """Load and normalize images for standard torchvision models.
 
-    It also coerces the image to RGB mode, if it is not already in that mode.
-
-    See the ImageClassification torchvision.transforms._presents.py module for the original image loader.
+    This loader resizes directly to 224 before center-crop, preserving the
+    largest square sub-image. It also converts inputs to RGB.
 
     Example:
-        - Original image loader: resize to 256, then center-crop the 224x224 subimage.
-        - This image loader: resize to 224, then center-crop the 224x224 subimage.
-    :return:
+        - Original loader: resize to 256, then center-crop 224.
+        - This loader: resize to 224, then center-crop 224.
     """
 
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
+        """Convert a PIL image into a normalized tensor.
+
+        Args:
+            img: Input image.
+
+        Returns:
+            Normalized image tensor suitable for torchvision models.
+        """
         img = img.convert("RGB")
 
         img_tensor = F.pil_to_tensor(pic=img)
@@ -43,6 +46,8 @@ class StandardImageLoader(torch.nn.Module):
 
 
 class _PretrainedNN(ImageNeuralNetwork, ABC):
+    """Base class for pretrained torchvision encoders."""
+
     layer_names: List[str]
 
     def __init__(
@@ -51,6 +56,16 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
         random_projection_dim: int | None = None,
         random_projection_seed: int | None = None,
     ):
+        """Initialize a pretrained encoder.
+
+        Args:
+            layer_name: Name of the layer whose activations are returned.
+            random_projection_dim: Optional output dimension for projection.
+            random_projection_seed: Seed for projection weights.
+
+        Raises:
+            ValueError: If the layer name is invalid.
+        """
         if layer_name not in self.layer_names:
             raise ValueError(
                 f"Unknown layer_name: {layer_name}. Available:\n{self.layer_names}"
@@ -72,14 +87,17 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
     @abstractmethod
     def _load_modules(self) -> Tuple[torch.nn.Module, torch.nn.Module]:
-        """
-        Load the image loader and model for this neural network.
-        :return:
+        """Load the image loader and model for this network.
+
+        Returns:
+            A tuple of (image_loader, model).
         """
         raise NotImplementedError
 
 
 class AlexNet(_PretrainedNN):
+    """AlexNet encoder with named layer outputs."""
+
     # A subset of all layers (each separated by one nonlinearity):
     layer_names = [
         "features.1",
@@ -93,6 +111,7 @@ class AlexNet(_PretrainedNN):
     ]
 
     def _load_modules(self):
+        """Load the AlexNet image loader and model."""
         image_loader = StandardImageLoader()
         model = torchvision.models.alexnet(
             weights=torchvision.models.AlexNet_Weights.IMAGENET1K_V1
@@ -101,6 +120,8 @@ class AlexNet(_PretrainedNN):
 
 
 class ResNet50(_PretrainedNN):
+    """ResNet-50 encoder with named layer outputs."""
+
     # A subset of layers (each separated by one nonlinearity, except layer4.2.relu, avgpool, and fc, which are connected by a linear layer):
     layer_names = [
         "relu",
@@ -125,6 +146,7 @@ class ResNet50(_PretrainedNN):
     ]
 
     def _load_modules(self):
+        """Load the ResNet-50 image loader and model."""
         image_loader = StandardImageLoader()
         model = torchvision.models.resnet50(
             weights=torchvision.models.ResNet50_Weights.IMAGENET1K_V1
