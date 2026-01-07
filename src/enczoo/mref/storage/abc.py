@@ -1,0 +1,67 @@
+from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Any
+
+import PIL.Image
+
+from mref.media_references import MediaRef, ImageRef, JsonRef, ZipRef
+
+
+# %%
+class Storage(ABC):
+
+    @abstractmethod
+    def check_data_exists(self, ref: MediaRef) -> bool:
+        raise NotImplementedError
+
+    # %% PIL.Image
+    @abstractmethod
+    def load_image(self, ref: ImageRef) -> PIL.Image:
+        raise NotImplementedError
+
+    @abstractmethod
+    def download_image_from_url(self, url: str, register: bool) -> PIL.Image:
+        raise NotImplementedError
+
+    @abstractmethod
+    def register_image(self, image: PIL.Image) -> ImageRef:
+        raise NotImplementedError
+
+    # %% JSON
+    @abstractmethod
+    def load_json(self, ref: JsonRef) -> Any:
+        raise NotImplementedError
+
+    @abstractmethod
+    def download_json_from_url(self, url: str, register: bool) -> Any:
+        raise NotImplementedError
+
+    @abstractmethod
+    def register_json(self, obj: Any) -> JsonRef:
+        raise NotImplementedError
+
+    # %% Zip files
+    @abstractmethod
+    def load_zip_path(self, ref: ZipRef) -> Path:
+        raise NotImplementedError
+
+    @abstractmethod
+    def download_zip_path_from_url(self, url: str, register: bool) -> Path:
+        raise NotImplementedError
+
+    @abstractmethod
+    def register_zip_path(self, zipfile_path: str) -> ZipRef:
+        raise NotImplementedError
+
+    # %% GZip files
+    @abstractmethod
+    def load_gzip_path(self, ref: ZipRef) -> Path:
+        raise NotImplementedError
+
+    @abstractmethod
+    def download_gzip_path_from_url(self, url: str, register: bool) -> Path:
+        raise NotImplementedError
+
+    @abstractmethod
+    def register_gzip_path(self, gzipfile_path: str) -> ZipRef:
+        raise NotImplementedError
