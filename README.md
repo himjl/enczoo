@@ -1,3 +1,3 @@
-# `enczoo`: a zoo of encoding models
+# `enczoo`: a zoo of encoding models for images
 
 [![CI](https://github.com/himjl/enczoo/actions/workflows/ci.yml/badge.svg)](https://github.com/himjl/enczoo/actions/workflows/ci.yml)
