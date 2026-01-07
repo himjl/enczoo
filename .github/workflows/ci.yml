@@ -21,6 +21,8 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+      - name: Create venv
+        run: uv venv
       - name: Install package
         run: uv pip install -e .
       - name: Run pytests
