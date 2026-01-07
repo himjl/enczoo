@@ -51,9 +51,9 @@ class ImageEncoding(
         if self._output_shape is None:
             test_image = PIL.Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
             test_result = self.compute_features(images=[test_image], flatten=False)
-            if not isinstance(test_result, torch.Tensor):
+            if not isinstance(test_result, np.ndarray):
                 raise ValueError(
-                    f"Expected a torch.Tensor from self.forward, but got {type(test_result)}"
+                    f"Expected a np.ndarray from self.forward, but got {type(test_result)}"
                 )
             if not test_result.shape[0] == 1:
                 raise ValueError(
