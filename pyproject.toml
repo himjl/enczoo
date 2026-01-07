@@ -1,6 +1,6 @@
 [project]
 name = "enczoo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Map images (as `PIL.Images`) to intermediate representations (as `np.ndarray`) from off-the-shelf vision models."
 readme = "README.md"
 authors = [
@@ -9,13 +9,9 @@ authors = [
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
 dependencies = [
-    "h5py>=3.15.1",
     "pillow>=12.1.0",
-    "pydantic>=2.12.5",
-    "pytest>=9.0.2",
     "torch>=2.9.1",
     "torchvision>=0.24.1",
-    "tqdm>=4.67.1",
 ]
 
 [build-system]

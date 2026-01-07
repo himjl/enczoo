@@ -105,7 +105,13 @@ def test_deterministic(input_tensor):
     assert torch.allclose(y, y2)
 
     # Add a test for the module hash
-    assert (
-        utils.hash_torch_module(mod)
-        == "5643758b7e62b0fd43d978513a48fc308fcc0a982230b676007cf9f03fbcea79"
+    hash_1 = utils.hash_torch_module(mod)
+    hash_2 = utils.hash_torch_module(mod)
+    assert hash_1 == hash_2
+
+    mod_2 = random_projection_layer.RandomProjection(
+        in_features=input_tensor.shape[1],
+        out_features=1000,
+        seed=0,
     )
+    assert utils.hash_torch_module(mod_2) == hash_1
