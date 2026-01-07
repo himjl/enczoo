@@ -3,7 +3,7 @@ import torch
 import torchvision.models
 import torchvision.transforms.functional as F
 from abc import ABC, abstractmethod
-from typing import Union, List, Tuple
+from typing import List, Tuple
 
 from enczoo.neural_networks.base import ImageNeuralNetwork, ImageEncodingConfig
 
@@ -27,16 +27,18 @@ class StandardImageLoader(torch.nn.Module):
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
         img = img.convert("RGB")
 
-        img = F.resize(img=img, size=[224], interpolation=F.InterpolationMode.BILINEAR)
-        img = F.center_crop(img=img, output_size=[224])
-        img = F.pil_to_tensor(pic=img)
-        img = F.convert_image_dtype(image=img, dtype=torch.float)
-        img = F.normalize(
-            tensor=img,
+        img_tensor = F.pil_to_tensor(pic=img)
+        img_tensor = F.resize(
+            img=img_tensor, size=[224], interpolation=F.InterpolationMode.BILINEAR
+        )
+        img_tensor = F.center_crop(img=img_tensor, output_size=[224])
+        img_tensor = F.convert_image_dtype(image=img_tensor, dtype=torch.float)
+        img_tensor = F.normalize(
+            tensor=img_tensor,
             mean=[0.485, 0.456, 0.406],
             std=[0.229, 0.224, 0.225],
         )
-        return img
+        return img_tensor
 
 
 class _PretrainedNN(ImageNeuralNetwork, ABC):
@@ -45,9 +47,9 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
     def __init__(
         self,
         layer_name: str,
-        random_projection_dim: Union[int, None] = None,
-        random_projection_seed: Union[int, None] = None,
-        config: ImageEncodingConfig = None,
+        random_projection_dim: int | None = None,
+        random_projection_seed: int | None = None,
+        config: ImageEncodingConfig | None = None,
     ):
         if layer_name not in self.layer_names:
             raise ValueError(
@@ -137,4 +139,4 @@ if __name__ == "__main__":
     )
     print(resnet50.training)
     print(resnet50.model.training)
-    print(resnet50.image_loader.training)
+    print(getattr(resnet50.image_loader, "training", None))

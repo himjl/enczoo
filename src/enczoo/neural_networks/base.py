@@ -13,7 +13,7 @@ from enczoo.transforms.random_projection import RandomProjection
 class ImageNeuralNetwork(ImageEncoding, ABC):
     def __init__(
         self,
-        image_loader: Union[torch.nn.Module, torchvision.transforms.Compose],
+        image_loader: torch.nn.Module | torchvision.transforms.Compose,
         model: torch.nn.Module,
         layer_name: str,
         random_projection_dim: int | None,

@@ -143,6 +143,12 @@ class ImageEncoding(
             raise ValueError(f"batch_size must be at least 1, but got {batch_size}.")
 
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
+        requires_media_store = any(isinstance(image, mref.ImageRef) for image in images)
+        if requires_media_store and media_store is None:
+            raise ValueError(
+                "media_store must be provided when images include ImageRefs."
+            )
+
         image_refs = []
         sha256_to_image: Dict[str, PIL.Image.Image] = {}
         for image in images:
@@ -179,11 +185,14 @@ class ImageEncoding(
             compute_image_refs, batch_size=batch_size
         ):
             # Resolve ImageRefs into PIL.Image.Images:
+            if requires_media_store:
+                assert media_store is not None
             batch_images = []
             for image_ref in batch_image_refs:
                 if image_ref.sha256 in sha256_to_image:
                     batch_images.append(sha256_to_image[image_ref.sha256])
                 else:
+                    assert media_store is not None
                     image = media_store.load_image(ref=image_ref)
                     batch_images.append(image)
 
@@ -247,7 +256,9 @@ class ImageEncoding(
         :return: a torch.Tensor of shape [B, *]
         """
         if not isinstance(images, list):
-            raise ValueError(f"Expected a list of PIL.Image.Images, but got {type(images)}")
+            raise ValueError(
+                f"Expected a list of PIL.Image.Images, but got {type(images)}"
+            )
         if len(images) == 0:
             raise ValueError("Expected a non-empty list of PIL.Image.Images.")
         if not isinstance(images[0], PIL.Image.Image):
