@@ -107,5 +107,5 @@ def test_deterministic(input_tensor):
     # Add a test for the module hash
     assert (
         utils.hash_torch_module(mod)
-        == "13ca60169afcb48f7729be3155af2021e7d83cda4dc98e50d93b74f217b6b5b3"
+        == "5643758b7e62b0fd43d978513a48fc308fcc0a982230b676007cf9f03fbcea79"
     )

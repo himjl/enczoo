@@ -13,7 +13,7 @@ import enczoo.utils as utils
             enczoo.Pixels(size=16),
         ),
         (
-            "f22b76e262e4361405da19129993ff00c8b9266db7d8b1e92807afbb378fb92e",
+            "8b6b33b3e0f8ca48a21515c1fdf00693379eed1079501604b1821e3c45725faf",
             enczoo.Pixels(size=16, random_projection_dim=10, random_projection_seed=0),
         ),
         (
@@ -25,7 +25,7 @@ import enczoo.utils as utils
             enczoo.ResNet50(layer_name="avgpool"),
         ),
         (
-            "9163abc4523fb7349d357d266e3f6b7c7c6751f15af36ffda2e8d1f9d4f81b92",
+            "4845c1120560d42b2b6ab801701becb9dfb57de5b26040ac19f07598c0a64339",
             enczoo.ResNet50(
                 layer_name="avgpool",
                 random_projection_dim=1000,
@@ -33,7 +33,7 @@ import enczoo.utils as utils
             ),
         ),
         (
-            "cd6540b12a82c605d0ea7ad3747acc3b886a735633f11ac3a8fd2f76617fa209",
+            "d5d49cd7e65556c845c6adbf5eddf54cc733002a11ff2e1f9118df4c3d10f0e4",
             enczoo.ResNet50(
                 layer_name="avgpool",
                 random_projection_dim=1000,
@@ -41,7 +41,7 @@ import enczoo.utils as utils
             ),
         ),
         (
-            "309f29dac32c5a2f907b7f8ee3ecb3ef51f165aff2f9d66b79801574d0186387",
+            "9ae436a02da38e2a16d7e5440e253edb3a7c721b5835fdaf18a99567c647942e",
             enczoo.ResNet50(
                 layer_name="avgpool",
                 random_projection_dim=500,
@@ -49,7 +49,7 @@ import enczoo.utils as utils
             ),
         ),
         (
-            "9af8f145bff0a399cafac5852f4a39a975b0a5ee246adb4d74f392f507301da8",
+            "7ab43a470323fd8870202d36adf089c63cfc7c33844bf416abb998ec6e5a3b31",
             enczoo.AlexNet(
                 layer_name="classifier.5",
                 random_projection_dim=1000,
