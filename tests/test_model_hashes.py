@@ -1,5 +1,6 @@
 # %%
 import pytest
+import torch
 
 import enczoo
 import enczoo.utils as utils
@@ -65,3 +66,17 @@ def test_model_hashing(target_hash: str, model: enczoo.ImageEncoding):
 
     # Manual hash
     assert utils.hash_torch_module(model) == target_hash
+
+
+def test_module_hash_device_invariant():
+    if not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+
+    model = enczoo.Pixels(
+        size=16,
+        random_projection_dim=10,
+        random_projection_seed=0,
+    )
+    cpu_hash = utils.hash_torch_module(model)
+    gpu_hash = utils.hash_torch_module(model.to("cuda"))
+    assert cpu_hash == gpu_hash
