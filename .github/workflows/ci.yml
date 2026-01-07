@@ -3,8 +3,8 @@ name: CI
 on:
   push:
     paths:
-      - ../../src/enczoo/**
-      - regression_tests/**
+      - src/**
+      - tests/**
       - pyproject.toml
       - .github/workflows/ci.yml
 jobs:
