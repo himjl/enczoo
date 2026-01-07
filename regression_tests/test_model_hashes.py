@@ -2,7 +2,7 @@
 import pytest
 
 import enczoo
-import enczoo.utils as utils
+import enczoo as utils
 
 
 @pytest.mark.parametrize(

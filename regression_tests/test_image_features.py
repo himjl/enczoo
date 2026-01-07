@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Callable
 
 import enczoo
-from enczoo.config import ImageEncodingConfig
+from enczoo import ImageEncodingConfig
 
 _dir = Path(__file__).parent
 
