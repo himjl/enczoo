@@ -13,7 +13,7 @@ This library is meant for those who just need to compute off-the-shelf image fea
 >`uv add enczoo`
  
 
-### Goal of `enczoo`
+### Things `enczoo` handles
 `enczoo` aims to "just work" by solving several tiny problems which collectively make computing image features a bit annoying. `enczoo` handles: 
     
 * performing model-specific image normalization ("_was it -1 to 1, 0 to 1, 0-255...? ImageNet channel normalization...?_"),
@@ -24,8 +24,3 @@ This library is meant for those who just need to compute off-the-shelf image fea
 * turning off autograd, and returning tensors as `np.ndarray` (no more `.cpu().numpy()`)
 * image cropping to fit input tensor shape (default: center cropping. no black bars!)
 * and more!
-
-`enczoo` also has knobs for many other things one often find themselves doing, such as:  
-* dimensionality reduction, for gigantic feature spaces that (default: seeded [random projection](https://en.wikipedia.org/wiki/Johnson–Lindenstrauss_lemma))
-
-
