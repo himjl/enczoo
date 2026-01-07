@@ -4,7 +4,7 @@ from typing import Any
 
 import PIL.Image
 
-from mref.media_references import MediaRef, ImageRef, JsonRef, ZipRef
+from enczoo.mref.media_references import MediaRef, ImageRef, JsonRef, ZipRef
 
 
 # %%
@@ -16,15 +16,15 @@ class Storage(ABC):
 
     # %% PIL.Image
     @abstractmethod
-    def load_image(self, ref: ImageRef) -> PIL.Image:
+    def load_image(self, ref: ImageRef) -> PIL.Image.Image:
         raise NotImplementedError
 
     @abstractmethod
-    def download_image_from_url(self, url: str, register: bool) -> PIL.Image:
+    def download_image_from_url(self, url: str, register: bool) -> PIL.Image.Image:
         raise NotImplementedError
 
     @abstractmethod
-    def register_image(self, image: PIL.Image) -> ImageRef:
+    def register_image(self, image: PIL.Image.Image) -> ImageRef:
         raise NotImplementedError
 
     # %% JSON

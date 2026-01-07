@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from mref.media_references import MediaRef
+from enczoo.mref.media_references import MediaRef
 
 
 class NotInStorageError(Exception):
