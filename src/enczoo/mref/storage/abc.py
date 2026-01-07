@@ -4,7 +4,7 @@ from typing import Any
 
 import PIL.Image
 
-from enczoo.mref.media_references import ImageRef, JsonRef, MediaRef, ZipRef
+from enczoo.mref.media_references import GzipRef, ImageRef, JsonRef, MediaRef, ZipRef
 
 
 # %%
@@ -13,7 +13,7 @@ class Storage(ABC):
     def check_data_exists(self, ref: MediaRef) -> bool:
         raise NotImplementedError
 
-    # %% PIL.Image
+    # %% PIL.Image.Image
     @abstractmethod
     def load_image(self, ref: ImageRef) -> PIL.Image.Image:
         raise NotImplementedError
@@ -49,12 +49,12 @@ class Storage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def register_zip_path(self, zipfile_path: str) -> ZipRef:
+    def register_zip_path(self, zipfile_path: Path) -> ZipRef:
         raise NotImplementedError
 
     # %% GZip files
     @abstractmethod
-    def load_gzip_path(self, ref: ZipRef) -> Path:
+    def load_gzip_path(self, ref: GzipRef) -> Path:
         raise NotImplementedError
 
     @abstractmethod
@@ -62,5 +62,5 @@ class Storage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def register_gzip_path(self, gzipfile_path: str) -> ZipRef:
+    def register_gzip_path(self, gzipfile_path: Path) -> GzipRef:
         raise NotImplementedError

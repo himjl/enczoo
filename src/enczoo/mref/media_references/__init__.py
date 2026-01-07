@@ -5,7 +5,7 @@ import PIL.Image
 import pydantic
 
 from typing import Any
-import mref.media_references.hash_functions as hashes
+import enczoo.mref.media_references.hash_functions as hashes
 
 
 # %%
@@ -33,7 +33,7 @@ class ImageRef(MediaRef):
     mime_type: Literal["image/png"] = "image/png"
 
     @classmethod
-    def from_image(cls, image: PIL.Image) -> "ImageRef":
+    def from_image(cls, image: PIL.Image.Image) -> "ImageRef":
         sha256 = hashes.hash_image(image=image)
         return cls(
             sha256=sha256,

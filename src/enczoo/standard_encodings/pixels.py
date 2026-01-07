@@ -16,9 +16,9 @@ class Pixels(ImageEncoding):
     def __init__(
         self,
         size: int = 16,
-        random_projection_dim: int = None,
-        random_projection_seed: int = None,
-        config: ImageEncodingConfig = None,
+        random_projection_dim: int | None = None,
+        random_projection_seed: int | None = None,
+        config: ImageEncodingConfig | None = None,
     ):
         super().__init__(config=config)
 
@@ -58,7 +58,7 @@ class Pixels(ImageEncoding):
         else:
             self.random_projection = None
 
-    def _images_to_features(self, images: List[PIL.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
         # Apply the transformations to each image
         transformed_images = [self.transforms(image.convert("RGB")) for image in images]
 

@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import numpy as np
 import PIL.Image
@@ -16,9 +16,9 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         image_loader: Union[torch.nn.Module, torchvision.transforms.Compose],
         model: torch.nn.Module,
         layer_name: str,
-        random_projection_dim: Union[int, None],
-        random_projection_seed: Union[int, None],
-        config: ImageEncodingConfig = None,
+        random_projection_dim: int | None,
+        random_projection_seed: int | None,
+        config: ImageEncodingConfig | None = None,
     ):
         super().__init__(config=config)
 
@@ -127,9 +127,9 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
         else:
             self.random_projection = None
 
-    def _images_to_features(self, images: List[PIL.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
         """
-        :param images: a list of PIL.Images
+        :param images: a list of PIL.Image.Images
         :return: a torch.Tensor of shape [B, *]
         """
 

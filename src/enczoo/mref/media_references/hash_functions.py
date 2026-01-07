@@ -8,7 +8,7 @@ from typing import Any
 from pathlib import Path
 
 
-def hash_image(image: PIL.Image) -> str:
+def hash_image(image: PIL.Image.Image) -> str:
     """
     Hash an image based on its np.uint8 RGBA representation.
     :param image:

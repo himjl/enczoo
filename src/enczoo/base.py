@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Union
 
-import mref
+import enczoo.mref as mref
 import numpy as np
 import PIL.Image
-import tensorbucket
+import enczoo.tensorbucket as tensorbucket
 import torch
 from tqdm import tqdm
 
@@ -18,7 +18,7 @@ class ImageEncoding(
     ABC,
 ):
     """
-    torch.nn.Module which executes a mapping from B-length lists of PIL.Images to [B, *] float tensors.
+    torch.nn.Module which executes a mapping from B-length lists of PIL.Image.Images to [B, *] float tensors.
     Its parameters do not aggregate gradients.
     """
 
@@ -109,9 +109,9 @@ class ImageEncoding(
     @torch.no_grad()
     def load_features(
         self,
-        images: List[Union[PIL.Image, mref.ImageRef]],
+        images: List[Union[PIL.Image.Image, mref.ImageRef]],
         flatten: bool = False,
-        media_store: mref.Storage = None,
+        media_store: mref.Storage | None = None,
         cache_new_features: bool = True,
         batch_size: int = 32,
     ) -> torch.Tensor:
@@ -144,7 +144,7 @@ class ImageEncoding(
 
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
         image_refs = []
-        sha256_to_image: Dict[str, PIL.Image] = {}
+        sha256_to_image: Dict[str, PIL.Image.Image] = {}
         for image in images:
             if isinstance(image, mref.ImageRef):
                 image_refs.append(image)
@@ -178,7 +178,7 @@ class ImageEncoding(
         for batch_image_refs in utils.iterate_batches(
             compute_image_refs, batch_size=batch_size
         ):
-            # Resolve ImageRefs into PIL.Images:
+            # Resolve ImageRefs into PIL.Image.Images:
             batch_images = []
             for image_ref in batch_image_refs:
                 if image_ref.sha256 in sha256_to_image:
@@ -224,13 +224,13 @@ class ImageEncoding(
 
     def compute_features(
         self,
-        images: List[PIL.Image],
+        images: List[PIL.Image.Image],
         flatten: bool = False,
     ) -> torch.Tensor:
         """
         Just an alias for __call__, to allow for type hinting by IDEs
         (PyCharm does not recognize __call__ signature of torch.nn.Modules, for some reason).
-        :param images: a B length list of PIL.Images.
+        :param images: a B length list of PIL.Image.Images.
         :param flatten: if True, flattens the output tensor to [B, d].
         :return: a torch.Tensor of shape [B, *]. If flatten=True, returns [B, d] instead.
         """
@@ -238,21 +238,21 @@ class ImageEncoding(
 
     def forward(
         self,
-        images: List[PIL.Image],
+        images: List[PIL.Image.Image],
         flatten: bool = False,
     ) -> torch.Tensor:
         """
-        :param images: a B length list of PIL.Images.
+        :param images: a B length list of PIL.Image.Images.
         :param flatten: if True, flattens the output tensor to [B, d].
         :return: a torch.Tensor of shape [B, *]
         """
         if not isinstance(images, list):
-            raise ValueError(f"Expected a list of PIL.Images, but got {type(images)}")
+            raise ValueError(f"Expected a list of PIL.Image.Images, but got {type(images)}")
         if len(images) == 0:
-            raise ValueError("Expected a non-empty list of PIL.Images.")
+            raise ValueError("Expected a non-empty list of PIL.Image.Images.")
         if not isinstance(images[0], PIL.Image.Image):
             raise ValueError(
-                f"Expected a list of PIL.Images, but element 0 is a {type(images[0])}"
+                f"Expected a list of PIL.Image.Images, but element 0 is a {type(images[0])}"
             )
 
         # Call the subclass implementation
@@ -264,9 +264,9 @@ class ImageEncoding(
         return feats
 
     @abstractmethod
-    def _images_to_features(self, images: List[PIL.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
         """
-        :param images: a list of PIL.Images
+        :param images: a list of PIL.Image.Images
         :return: a torch.Tensor of shape [B, *]
         """
         raise NotImplementedError

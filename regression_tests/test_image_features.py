@@ -12,7 +12,7 @@ _dir = Path(__file__).parent
 
 # %%
 @pytest.fixture
-def test_images() -> List[PIL.Image]:
+def test_images() -> List[PIL.Image.Image]:
     imagesdir = _dir / "test_images"
     images = []
     for path in sorted(imagesdir.glob("*.png")):

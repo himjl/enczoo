@@ -1,3 +1,3 @@
-from tensorbucket.base import TensorBucket
+from enczoo.tensorbucket.base import TensorBucket
 
 __all__ = ["TensorBucket"]

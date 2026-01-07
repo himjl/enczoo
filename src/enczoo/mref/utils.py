@@ -2,12 +2,12 @@ import mimetypes
 from pathlib import Path
 
 import PIL.Image
-import requests
+import requests  # type: ignore[unresolved-import]
 from tqdm import tqdm
 
 
 # %% Image
-def load_image(path: Path) -> PIL.Image:
+def load_image(path: Path) -> PIL.Image.Image:
     if not path.exists():
         raise FileNotFoundError(f"Image not found at {path}")
 
