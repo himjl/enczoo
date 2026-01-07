@@ -34,7 +34,7 @@ def iterate_batches(iterable: Iterable[T], batch_size: int) -> Iterator[List[T]]
 def hash_torch_module(module: torch.nn.Module) -> str:
     """Return a hash for a torch.nn.Module.
 
-    The hash depends on the module's state_dict and string representation.
+    The hash depends on the module's state_dict keys, shapes, dtypes, and values.
 
     Args:
         module: Module to hash.
@@ -45,16 +45,15 @@ def hash_torch_module(module: torch.nn.Module) -> str:
 
     sha256_hash = hashlib.sha256()
 
-    # Hash the model's state_dict:
+    # Hash the model's state_dict, including key names for structural stability.
     state_dict = module.state_dict()
     for key in sorted(state_dict.keys()):
-        tensor_value = state_dict[key].detach().cpu().numpy()
+        sha256_hash.update(key.encode("utf-8"))
+        tensor = state_dict[key].detach().cpu()
+        sha256_hash.update(str(tensor.dtype).encode("utf-8"))
+        sha256_hash.update(str(tuple(tensor.shape)).encode("utf-8"))
+        tensor_value = tensor.numpy()
         sha256_hash.update(tensor_value.tobytes())
-
-    # Hash the module's string representation:
-    module_string = str(module)
-    module_string = module_string.encode("utf-8")
-    sha256_hash.update(module_string)
 
     # Return the combined hash:
     return sha256_hash.hexdigest()

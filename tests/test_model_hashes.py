@@ -10,23 +10,23 @@ import enczoo.utils as utils
     argnames="target_hash, model",
     argvalues=[
         (
-            "8cc79290dc3859ce6bfaebc75272bd054ac638f51aba2403cc73158d8af05a49",
+            "889b45d57f2c609b89addefcdb584560a330078de8bd5f3d6436e063b6b70d68",
             enczoo.Pixels(size=16),
         ),
         (
-            "8b6b33b3e0f8ca48a21515c1fdf00693379eed1079501604b1821e3c45725faf",
+            "57497bf1c2a7fbfd1f14643f4ff5f5b052b39843d929647624c76c350dd06069",
             enczoo.Pixels(size=16, random_projection_dim=10, random_projection_seed=0),
         ),
         (
-            "6c0180097dfa07ceb88d615aaafe3204292ce210082648da4723ca854100fb0e",
+            "dcf5cf6703147b21602fd76241fe4c0ac3c3da6ca577155d7497826ec8e6c006",
             enczoo.ResNet50(layer_name="layer1.1.relu"),
         ),
         (
-            "aecd510a627ffe402f89589bd57474764443e9c49f43f63193aafc73a26f59bb",
+            "a2839e27342e1736f1e1154902e025e46119a2d404c062f68e79547b6ede3f07",
             enczoo.ResNet50(layer_name="avgpool"),
         ),
         (
-            "4845c1120560d42b2b6ab801701becb9dfb57de5b26040ac19f07598c0a64339",
+            "671006fac1f541e4b28ed3de60c824ae3b9969fd622ab8e2a81cbe72e6fc4eed",
             enczoo.ResNet50(
                 layer_name="avgpool",
                 random_projection_dim=1000,
@@ -34,7 +34,7 @@ import enczoo.utils as utils
             ),
         ),
         (
-            "d5d49cd7e65556c845c6adbf5eddf54cc733002a11ff2e1f9118df4c3d10f0e4",
+            "b1d08c3564b38c3210a2c76518bab3f26ee61e5cbcc866289d41045cd9db57d8",
             enczoo.ResNet50(
                 layer_name="avgpool",
                 random_projection_dim=1000,
@@ -42,7 +42,7 @@ import enczoo.utils as utils
             ),
         ),
         (
-            "9ae436a02da38e2a16d7e5440e253edb3a7c721b5835fdaf18a99567c647942e",
+            "ab7f88b0371d9c899acbfbf4c4bf7e6c883106f5c8a298f489221d4b2e86851f",
             enczoo.ResNet50(
                 layer_name="avgpool",
                 random_projection_dim=500,
@@ -50,7 +50,7 @@ import enczoo.utils as utils
             ),
         ),
         (
-            "7ab43a470323fd8870202d36adf089c63cfc7c33844bf416abb998ec6e5a3b31",
+            "b3ba9cb815d3bfaf21c2c45a3b3e152dc6d40a35e49950ea76e4c2ba0b6e8413",
             enczoo.AlexNet(
                 layer_name="classifier.5",
                 random_projection_dim=1000,
