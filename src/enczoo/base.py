@@ -23,11 +23,13 @@ class ImageEncoding(
     """
 
     def __init__(
-            self,
-            config: Union[ImageEncodingConfig, None],
+        self,
+        config: Union[ImageEncodingConfig, None],
     ):
         super().__init__()
-        self.config: ImageEncodingConfig = config if config is not None else default_config
+        self.config: ImageEncodingConfig = (
+            config if config is not None else default_config
+        )
         self._module_hash = None
         self._tensor_bucket = None
         self._output_shape = None
@@ -48,7 +50,7 @@ class ImageEncoding(
             try:
                 return next(self.buffers()).device
             except StopIteration:
-                return torch.device('cpu')
+                return torch.device("cpu")
 
     @property
     def output_shape(self) -> Tuple[int, ...]:
@@ -56,9 +58,13 @@ class ImageEncoding(
             test_image = PIL.Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
             test_result = self.compute_features(images=[test_image], flatten=False)
             if not isinstance(test_result, torch.Tensor):
-                raise ValueError(f'Expected a torch.Tensor from self.forward, but got {type(test_result)}')
+                raise ValueError(
+                    f"Expected a torch.Tensor from self.forward, but got {type(test_result)}"
+                )
             if not test_result.shape[0] == 1:
-                raise ValueError(f'Expected a batch size of 1, but got {test_result.shape}')
+                raise ValueError(
+                    f"Expected a batch size of 1, but got {test_result.shape}"
+                )
             if len(test_result.shape) == 1:
                 output_shape = tuple()
             else:
@@ -71,7 +77,7 @@ class ImageEncoding(
     @property
     def module_hash(self) -> str:
         if self.config.trainable:
-            raise ValueError('Cannot hash a trainable model.')
+            raise ValueError("Cannot hash a trainable model.")
 
         # Turn off gradients for all parameters
         for param in self.parameters():
@@ -86,26 +92,28 @@ class ImageEncoding(
     def tensor_bucket(self) -> tensorbucket.TensorBucket:
         if self.config.trainable:
             # Caching not supported for a trainable model
-            raise ValueError('Cannot use a tensor bucket with a trainable model.')
+            raise ValueError("Cannot use a tensor bucket with a trainable model.")
 
         # Initialize tensor bucket (for caching)
         if self._tensor_bucket is not None:
             return self._tensor_bucket
 
         self._tensor_bucket = tensorbucket.TensorBucket(
-            loc=self.config.cachedir / self.__class__.__name__ / (self.module_hash + '.h5'),
+            loc=self.config.cachedir
+            / self.__class__.__name__
+            / (self.module_hash + ".h5"),
             shape=self.output_shape,
         )
         return self._tensor_bucket
 
     @torch.no_grad()
     def load_features(
-            self,
-            images: List[Union[PIL.Image, mref.ImageRef]],
-            flatten: bool = False,
-            media_store: mref.Storage = None,
-            cache_new_features: bool = True,
-            batch_size: int = 32,
+        self,
+        images: List[Union[PIL.Image, mref.ImageRef]],
+        flatten: bool = False,
+        media_store: mref.Storage = None,
+        cache_new_features: bool = True,
+        batch_size: int = 32,
     ) -> torch.Tensor:
         """
         A convenience method which loads the features for a list of images from a cache.
@@ -127,10 +135,12 @@ class ImageEncoding(
         """
 
         if self.config.trainable and cache_new_features:
-            raise ValueError('Cannot cache new features unless the model has self.config.trainable=False.')
+            raise ValueError(
+                "Cannot cache new features unless the model has self.config.trainable=False."
+            )
 
         if batch_size < 1:
-            raise ValueError(f'batch_size must be at least 1, but got {batch_size}.')
+            raise ValueError(f"batch_size must be at least 1, but got {batch_size}.")
 
         # If any ImageRefs are given, check if the tensor bucket has the corresponding tensors.
         image_refs = []
@@ -143,9 +153,11 @@ class ImageEncoding(
                 image_refs.append(image_ref)
                 sha256_to_image[image_ref.sha256] = image
             else:
-                raise ValueError(f'Unsupported image type: {type(image)}')
+                raise ValueError(f"Unsupported image type: {type(image)}")
 
-        tensor_already_cached_mask: List[bool] = self.tensor_bucket.check_keys_exist(keys=[v.sha256 for v in image_refs])
+        tensor_already_cached_mask: List[bool] = self.tensor_bucket.check_keys_exist(
+            keys=[v.sha256 for v in image_refs]
+        )
 
         # Collect ImageRefs for which new features must be computed
         compute_image_refs: List[mref.ImageRef] = []
@@ -158,17 +170,21 @@ class ImageEncoding(
         # Compute and cache backbone features for any new ImageRefs:
         delete_keys = []
         ncompute_images = len(compute_image_refs)
-        pbar = tqdm(total=len(compute_image_refs), desc='Computing image features', disable=ncompute_images <= batch_size)
-        for batch_image_refs in utils.iterate_batches(compute_image_refs, batch_size=batch_size):
+        pbar = tqdm(
+            total=len(compute_image_refs),
+            desc="Computing image features",
+            disable=ncompute_images <= batch_size,
+        )
+        for batch_image_refs in utils.iterate_batches(
+            compute_image_refs, batch_size=batch_size
+        ):
             # Resolve ImageRefs into PIL.Images:
             batch_images = []
             for image_ref in batch_image_refs:
                 if image_ref.sha256 in sha256_to_image:
                     batch_images.append(sha256_to_image[image_ref.sha256])
                 else:
-                    image = media_store.load_image(
-                        ref=image_ref
-                    )
+                    image = media_store.load_image(ref=image_ref)
                     batch_images.append(image)
 
             # Run forward pass:
@@ -176,7 +192,10 @@ class ImageEncoding(
             batch_backbone_features = batch_features.detach().cpu().numpy()
 
             # Cache the backbone features in the store, possibly temporarily
-            key_to_tensor = {image_ref.sha256: tensor for image_ref, tensor in zip(batch_image_refs, batch_backbone_features)}
+            key_to_tensor = {
+                image_ref.sha256: tensor
+                for image_ref, tensor in zip(batch_image_refs, batch_backbone_features)
+            }
             self.tensor_bucket.store_tensors(
                 key_to_tensor=key_to_tensor,
                 overwrite_if_exists=False,
@@ -189,7 +208,9 @@ class ImageEncoding(
         pbar.close()
 
         # Assemble return tensor:
-        features = np.array(self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs]))
+        features = np.array(
+            self.tensor_bucket.retrieve_tensors(keys=[v.sha256 for v in image_refs])
+        )
         features = torch.from_numpy(features)
 
         if flatten:
@@ -202,9 +223,9 @@ class ImageEncoding(
         return features
 
     def compute_features(
-            self,
-            images: List[PIL.Image],
-            flatten: bool = False,
+        self,
+        images: List[PIL.Image],
+        flatten: bool = False,
     ) -> torch.Tensor:
         """
         Just an alias for __call__, to allow for type hinting by IDEs
@@ -216,9 +237,9 @@ class ImageEncoding(
         return self(images=images, flatten=flatten)
 
     def forward(
-            self,
-            images: List[PIL.Image],
-            flatten: bool = False,
+        self,
+        images: List[PIL.Image],
+        flatten: bool = False,
     ) -> torch.Tensor:
         """
         :param images: a B length list of PIL.Images.
@@ -226,11 +247,13 @@ class ImageEncoding(
         :return: a torch.Tensor of shape [B, *]
         """
         if not isinstance(images, list):
-            raise ValueError(f'Expected a list of PIL.Images, but got {type(images)}')
+            raise ValueError(f"Expected a list of PIL.Images, but got {type(images)}")
         if len(images) == 0:
-            raise ValueError('Expected a non-empty list of PIL.Images.')
+            raise ValueError("Expected a non-empty list of PIL.Images.")
         if not isinstance(images[0], PIL.Image.Image):
-            raise ValueError(f'Expected a list of PIL.Images, but element 0 is a {type(images[0])}')
+            raise ValueError(
+                f"Expected a list of PIL.Images, but element 0 is a {type(images[0])}"
+            )
 
         # Call the subclass implementation
         feats = self._images_to_features(images=images)

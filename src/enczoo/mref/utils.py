@@ -27,20 +27,20 @@ def infer_mime_type(url: str) -> str:
         # If guessing fails, try fetching the Content-Type header
     try:
         response = requests.head(url, allow_redirects=True)
-        content_type = response.headers.get('Content-Type')
+        content_type = response.headers.get("Content-Type")
 
         if content_type:
-            return content_type.split(';')[0]  # Remove charset if present
+            return content_type.split(";")[0]  # Remove charset if present
     except requests.RequestException:
         pass
 
         # If HEAD fails, try a minimal GET request
     try:
         response = requests.get(url, stream=True)
-        content_type = response.headers.get('Content-Type')
+        content_type = response.headers.get("Content-Type")
 
         if content_type:
-            return content_type.split(';')[0]
+            return content_type.split(";")[0]
     except requests.RequestException:
         pass
 
@@ -54,9 +54,9 @@ def get_extension_from_mime_type(mime_type: str) -> str:
     :return:
     """
 
-    if mime_type == 'application/gzip':
+    if mime_type == "application/gzip":
         # Not supported by mimetypes.guess_extension
-        return '.gz'
+        return ".gz"
 
     result = mimetypes.guess_extension(mime_type, strict=True)
 
@@ -70,15 +70,21 @@ def get_extension_from_mime_type(mime_type: str) -> str:
 def download_file(url: str, output_path: Path) -> None:
     # Send a GET request to fetch the file
     response = requests.get(url, stream=True)
-    total_size_in_bytes = int(response.headers.get('content-length', 0))
+    total_size_in_bytes = int(response.headers.get("content-length", 0))
     disable_pbar = total_size_in_bytes < 10000
 
     # Create the output directory if it does not exist
     if not output_path.parent.exists():
         output_path.parent.mkdir(parents=True)
 
-    with tqdm(total=total_size_in_bytes, disable=disable_pbar, unit='B', unit_scale=True, desc='Download progress:') as pbar:
-        with open(output_path.as_posix(), 'wb') as file:
+    with tqdm(
+        total=total_size_in_bytes,
+        disable=disable_pbar,
+        unit="B",
+        unit_scale=True,
+        desc="Download progress:",
+    ) as pbar:
+        with open(output_path.as_posix(), "wb") as file:
             # Iterate over the response data in chunks and write to file
             for chunk in response.iter_content(chunk_size=4096):
                 if chunk:

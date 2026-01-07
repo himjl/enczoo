@@ -14,18 +14,18 @@ class Pixels(ImageEncoding):
     """
 
     def __init__(
-            self,
-            size: int = 16,
-            random_projection_dim: int = None,
-            random_projection_seed: int = None,
-            config: ImageEncodingConfig = None
+        self,
+        size: int = 16,
+        random_projection_dim: int = None,
+        random_projection_seed: int = None,
+        config: ImageEncodingConfig = None,
     ):
-        super().__init__(
-            config=config
-        )
+        super().__init__(config=config)
 
         # Register size tensor as buffer
-        self.register_buffer('size', torch.tensor(size, dtype=torch.int16, requires_grad=False))
+        self.register_buffer(
+            "size", torch.tensor(size, dtype=torch.int16, requires_grad=False)
+        )
 
         # Transform
         self.transforms = v2.Compose(
@@ -42,14 +42,18 @@ class Pixels(ImageEncoding):
         # Random projection
         if random_projection_dim is not None:
             if random_projection_dim > (size * size * 3):
-                raise ValueError(f'random_projection_dim must be less than or equal to size * size * 3={size*size*3}!')
+                raise ValueError(
+                    f"random_projection_dim must be less than or equal to size * size * 3={size * size * 3}!"
+                )
 
             if random_projection_seed is None:
-                raise ValueError('random_projection_seed must be provided if random_projection_dim is not None!')
+                raise ValueError(
+                    "random_projection_seed must be provided if random_projection_dim is not None!"
+                )
             self.random_projection = RandomProjection(
                 seed=random_projection_seed,
-                in_features=int(size*size*3),
-                out_features=random_projection_dim
+                in_features=int(size * size * 3),
+                out_features=random_projection_dim,
             )
         else:
             self.random_projection = None
@@ -63,7 +67,9 @@ class Pixels(ImageEncoding):
 
         # If random projection is enabled, apply it
         if self.random_projection is not None:
-            return self.random_projection(images_tensor.reshape(images_tensor.shape[0], -1))
+            return self.random_projection(
+                images_tensor.reshape(images_tensor.shape[0], -1)
+            )
         else:
             # Rearrange from BCHW to BHWC order
             images_tensor = images_tensor.permute(0, 2, 3, 1)

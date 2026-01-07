@@ -25,17 +25,10 @@ class StandardImageLoader(torch.nn.Module):
     """
 
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
-        img = img.convert('RGB')
+        img = img.convert("RGB")
 
-        img = F.resize(
-            img=img,
-            size=[224],
-            interpolation=F.InterpolationMode.BILINEAR
-        )
-        img = F.center_crop(
-            img=img,
-            output_size=[224]
-        )
+        img = F.resize(img=img, size=[224], interpolation=F.InterpolationMode.BILINEAR)
+        img = F.center_crop(img=img, output_size=[224])
         img = F.pil_to_tensor(pic=img)
         img = F.convert_image_dtype(image=img, dtype=torch.float)
         img = F.normalize(
@@ -50,14 +43,16 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
     layer_names: List[str]
 
     def __init__(
-            self,
-            layer_name: str,
-            random_projection_dim: Union[int, None] = None,
-            random_projection_seed: Union[int, None] = None,
-            config: ImageEncodingConfig = None,
+        self,
+        layer_name: str,
+        random_projection_dim: Union[int, None] = None,
+        random_projection_seed: Union[int, None] = None,
+        config: ImageEncodingConfig = None,
     ):
         if layer_name not in self.layer_names:
-            raise ValueError(f'Unknown layer_name: {layer_name}. Available:\n{self.layer_names}')
+            raise ValueError(
+                f"Unknown layer_name: {layer_name}. Available:\n{self.layer_names}"
+            )
 
         image_loader, model = self._load_modules()
 
@@ -86,57 +81,59 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 class AlexNet(_PretrainedNN):
     # A subset of all layers (each separated by one nonlinearity):
     layer_names = [
-        'features.1',
-        'features.4',
-        'features.7',
-        'features.9',
-        'features.11',
-        'classifier.2',
-        'classifier.5',
-        'classifier.6'
+        "features.1",
+        "features.4",
+        "features.7",
+        "features.9",
+        "features.11",
+        "classifier.2",
+        "classifier.5",
+        "classifier.6",
     ]
 
     def _load_modules(self):
         image_loader = StandardImageLoader()
-        model = torchvision.models.alexnet(weights=torchvision.models.AlexNet_Weights.IMAGENET1K_V1)
+        model = torchvision.models.alexnet(
+            weights=torchvision.models.AlexNet_Weights.IMAGENET1K_V1
+        )
         return image_loader, model
 
 
 class ResNet50(_PretrainedNN):
     # A subset of layers (each separated by one nonlinearity, except layer4.2.relu, avgpool, and fc, which are connected by a linear layer):
     layer_names = [
-        'relu',
-        'layer1.0.relu',
-        'layer1.1.relu',
-        'layer1.2.relu',
-        'layer2.0.relu',
-        'layer2.1.relu',
-        'layer2.2.relu',
-        'layer2.3.relu',
-        'layer3.0.relu',
-        'layer3.1.relu',
-        'layer3.2.relu',
-        'layer3.3.relu',
-        'layer3.4.relu',
-        'layer3.5.relu',
-        'layer4.0.relu',
-        'layer4.1.relu',
-        'layer4.2.relu',
-        'avgpool',
-        'fc',
+        "relu",
+        "layer1.0.relu",
+        "layer1.1.relu",
+        "layer1.2.relu",
+        "layer2.0.relu",
+        "layer2.1.relu",
+        "layer2.2.relu",
+        "layer2.3.relu",
+        "layer3.0.relu",
+        "layer3.1.relu",
+        "layer3.2.relu",
+        "layer3.3.relu",
+        "layer3.4.relu",
+        "layer3.5.relu",
+        "layer4.0.relu",
+        "layer4.1.relu",
+        "layer4.2.relu",
+        "avgpool",
+        "fc",
     ]
 
     def _load_modules(self):
         image_loader = StandardImageLoader()
-        model = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.IMAGENET1K_V1)
+        model = torchvision.models.resnet50(
+            weights=torchvision.models.ResNet50_Weights.IMAGENET1K_V1
+        )
         return image_loader, model
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     resnet50 = ResNet50(
-        layer_name='avgpool',
-        random_projection_dim=None,
-        random_projection_seed=0
+        layer_name="avgpool", random_projection_dim=None, random_projection_seed=0
     )
     print(resnet50.training)
     print(resnet50.model.training)

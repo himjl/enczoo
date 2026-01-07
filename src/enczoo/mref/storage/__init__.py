@@ -3,7 +3,7 @@ import json
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Any, Callable, Literal, Set
+from typing import Any, Callable, Set
 
 import PIL.Image
 import pydantic
@@ -14,27 +14,21 @@ from enczoo.mref.media_references import GzipRef, ImageRef, JsonRef, MediaRef, Z
 from enczoo.mref.storage.abc import Storage
 from enczoo.mref.storage.exceptions import (
     NotInStorageError,
-    UnsupportedUrlMimeTypeError,
 )
 
 
 # %% Storage class
 class FileSystemStorage(Storage):
-
     def __init__(self, cachedir: Path):
         self.cachedir = cachedir
         self._ref_manifest: Set[MediaRef] = set()
 
     # %% Images
-    def load_image(self, ref: ImageRef) -> PIL.Image:
-        loaded_image = self._load_core(
-            ref=ref,
-            load_func=utils.load_image
-        )
+    def load_image(self, ref: ImageRef) -> PIL.Image.Image:
+        loaded_image = self._load_core(ref=ref, load_func=utils.load_image)
         return loaded_image
 
-    def download_image_from_url(self, url: str, register: bool) -> PIL.Image:
-
+    def download_image_from_url(self, url: str, register: bool) -> PIL.Image.Image:
         def register_callback(path: Path):
             image = utils.load_image(path)
             # Cache the image
@@ -52,7 +46,7 @@ class FileSystemStorage(Storage):
         image = self.load_image(ref=ref)
         return image
 
-    def register_image(self, image: PIL.Image) -> ImageRef:
+    def register_image(self, image: PIL.Image.Image) -> ImageRef:
         ref = ImageRef.from_image(image=image)
         self._save_core(
             ref=ref,
@@ -72,7 +66,6 @@ class FileSystemStorage(Storage):
         )
 
     def download_json_from_url(self, url: str, register: bool) -> Any:
-
         def register_callback(path: Path):
             json_string = path.read_text()
             obj = json.loads(json_string)
@@ -101,13 +94,9 @@ class FileSystemStorage(Storage):
 
     # %% Zip
     def load_zip_path(self, ref: ZipRef) -> Path:
-        return self._load_core(
-            ref=ref,
-            load_func=lambda path: path
-        )
+        return self._load_core(ref=ref, load_func=lambda path: path)
 
     def download_zip_path_from_url(self, url: str, register: bool) -> Path:
-
         def register_callback(path: Path):
             ref = self.register_zip_path(zipfile_path=path)
             return ref
@@ -138,13 +127,9 @@ class FileSystemStorage(Storage):
 
     # %% GZip
     def load_gzip_path(self, ref: GzipRef) -> Path:
-        return self._load_core(
-            ref=ref,
-            load_func=lambda path: path
-        )
+        return self._load_core(ref=ref, load_func=lambda path: path)
 
     def download_gzip_path_from_url(self, url: str, register: bool) -> Path:
-
         def register_callback(path: Path):
             ref = self.register_gzip_path(gzipfile_path=path)
             return ref
@@ -176,12 +161,12 @@ class FileSystemStorage(Storage):
     # %% Common
     def _get_cache_path(self, ref: MediaRef) -> Path:
         extension = utils.get_extension_from_mime_type(mime_type=ref.mime_type)
-        filename = ref.sha256 + f'{extension}'
-        return self.cachedir / 'media' / ref.mime_type / filename
+        filename = ref.sha256 + f"{extension}"
+        return self.cachedir / "media" / ref.mime_type / filename
 
     def _get_url_ref_path(self, url: str) -> Path:
         url_hash = hashing.hash_url(url=url)
-        return self.cachedir / 'urls' / (url_hash + '.json')
+        return self.cachedir / "urls" / (url_hash + ".json")
 
     def check_data_exists(self, ref: MediaRef) -> bool:
         if ref not in self._ref_manifest:
@@ -195,10 +180,7 @@ class FileSystemStorage(Storage):
         return exists
 
     def _save_core(
-            self,
-            ref: MediaRef,
-            save_func: Callable[[Path], None],
-            overwrite: bool
+        self, ref: MediaRef, save_func: Callable[[Path], None], overwrite: bool
     ) -> None:
         path = self._get_cache_path(ref=ref)
         if path.exists() and not overwrite:
@@ -209,10 +191,14 @@ class FileSystemStorage(Storage):
             path.parent.mkdir(parents=True)
 
         save_func(path)
-        print(f'Saved {ref.mime_type} to', path)
+        print(f"Saved {ref.mime_type} to", path)
         self._ref_manifest.add(ref)
 
-    def _load_core(self, ref: MediaRef, load_func: Callable[[Path], Any], ) -> Any:
+    def _load_core(
+        self,
+        ref: MediaRef,
+        load_func: Callable[[Path], Any],
+    ) -> Any:
         path = self._get_cache_path(ref=ref)
         if not path.exists():
             raise NotInStorageError(ref=ref, path=path)
@@ -226,12 +212,14 @@ class FileSystemStorage(Storage):
     class _UrlMediaRefAssociation(pydantic.BaseModel):
         url: str
         ref: MediaRef
-        date_accessed: float = pydantic.Field(default_factory=lambda: datetime.datetime.now().timestamp())
+        date_accessed: float = pydantic.Field(
+            default_factory=lambda: datetime.datetime.now().timestamp()
+        )
 
     def _load_from_url_core(
-            self,
-            url: str,
-            register_callback: Callable[[Path], MediaRef],
+        self,
+        url: str,
+        register_callback: Callable[[Path], MediaRef],
     ) -> MediaRef:
         """
         Downloads data from a URL and passes it to a callback function.
@@ -244,7 +232,9 @@ class FileSystemStorage(Storage):
         url_ref_path = self._get_url_ref_path(url=url)
         if url_ref_path.exists():
             ref_string = url_ref_path.read_text()
-            association = self._UrlMediaRefAssociation.model_validate_json(json_data=ref_string)
+            association = self._UrlMediaRefAssociation.model_validate_json(
+                json_data=ref_string
+            )
 
             # Return the MediaRef immediately if its backing data is in the cache
             if self.check_data_exists(ref=association.ref):

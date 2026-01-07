@@ -1,5 +1,3 @@
 from tensorbucket.base import TensorBucket
 
-__all__ = [
-    'TensorBucket'
-]
+__all__ = ["TensorBucket"]

@@ -11,10 +11,10 @@ class RandomProjection(nn.Module):
     """
 
     def __init__(
-            self,
-            in_features: int,
-            out_features: int,
-            seed: int,
+        self,
+        in_features: int,
+        out_features: int,
+        seed: int,
     ):
         """
         :param input_shape: The shape of the input tensor, not including the batch dimension.
@@ -27,18 +27,28 @@ class RandomProjection(nn.Module):
         self.train(mode=False)
 
         # Register inputs as buffers; these will constitute the module's hash.
-        self.register_buffer('seed', torch.tensor(seed, dtype=torch.int64, requires_grad=False))
-        self.register_buffer('in_features', torch.tensor(in_features, dtype=torch.int64, requires_grad=False))
-        self.register_buffer('out_features', torch.tensor(out_features, dtype=torch.int64, requires_grad=False))
+        self.register_buffer(
+            "seed", torch.tensor(seed, dtype=torch.int64, requires_grad=False)
+        )
+        self.register_buffer(
+            "in_features",
+            torch.tensor(in_features, dtype=torch.int64, requires_grad=False),
+        )
+        self.register_buffer(
+            "out_features",
+            torch.tensor(out_features, dtype=torch.int64, requires_grad=False),
+        )
 
         # Initialize the linear map. This has proven impossible so far to hash consistently, due to floating point runoff, so it is not registered.
         # See: https://discuss.pytorch.org/t/saving-nn-module-to-parent-nn-module-without-registering-paremeters/132082/6
-        self._linear_wrapper = [nn.Linear(
-            in_features=in_features,
-            out_features=out_features,
-            bias=False,
-            dtype=torch.float32,
-        )]
+        self._linear_wrapper = [
+            nn.Linear(
+                in_features=in_features,
+                out_features=out_features,
+                bias=False,
+                dtype=torch.float32,
+            )
+        ]
 
         # Turn off gradient tracking
         self._linear_wrapper[0].requires_grad_(requires_grad=False)
@@ -47,8 +57,7 @@ class RandomProjection(nn.Module):
             # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
             self._linear_wrapper[0].weight[:] = torch.randn(
-                size=(out_features, in_features),
-                requires_grad=False
+                size=(out_features, in_features), requires_grad=False
             ) / math.sqrt(in_features * out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

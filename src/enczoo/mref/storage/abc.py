@@ -9,7 +9,6 @@ from enczoo.mref.media_references import ImageRef, JsonRef, MediaRef, ZipRef
 
 # %%
 class Storage(ABC):
-
     @abstractmethod
     def check_data_exists(self, ref: MediaRef) -> bool:
         raise NotImplementedError
