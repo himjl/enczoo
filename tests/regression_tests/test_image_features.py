@@ -82,13 +82,8 @@ def test_feature_regression(
     # Run forward again:
     result2 = model.compute_features(images=test_images).detach().cpu().numpy()
 
-
     print(np.max(np.abs(result - test_target)))
-    assert (
-        result.shape
-        == result2.shape
-        == test_target.shape
-    )
+    assert result.shape == result2.shape == test_target.shape
     rtol = 1e-3
     atol = 1e-5
     assert np.allclose(result, test_target, rtol=rtol, atol=atol)
