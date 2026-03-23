@@ -12,8 +12,11 @@ from enczoo.neural_networks.base import ImageNeuralNetwork
 class StandardImageLoader(torch.nn.Module):
     """Load and normalize images for standard torchvision models.
 
-    This loader resizes directly to 224 before center-crop, preserving the
-    largest square sub-image. It also converts inputs to RGB.
+    This loader resizes the smaller dimension of the image to 224 before performing a 224 center-crop.
+    This can be contrasted with the standard torchvision loader, which resizes the smaller dimension to some size >224 (e.g. 256 for AlexNet; 232 for ConvNeXt) before performing a 224 center-crop, which
+        effectively removes more of the image's content.
+
+    This preserves the largest square sub-image. It also converts inputs to RGB.
 
     Example:
         - Original loader: resize to 256, then center-crop 224.
@@ -94,7 +97,7 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
         """
         raise NotImplementedError
 
-
+# %%
 class AlexNet(_PretrainedNN):
     """AlexNet encoder with named layer outputs."""
 
@@ -119,6 +122,7 @@ class AlexNet(_PretrainedNN):
         return image_loader, model
 
 
+# %%
 class ResNet50(_PretrainedNN):
     """ResNet-50 encoder with named layer outputs."""
 
@@ -153,11 +157,24 @@ class ResNet50(_PretrainedNN):
         )
         return image_loader, model
 
-
-if __name__ == "__main__":
-    resnet50 = ResNet50(
-        layer_name="avgpool", random_projection_dim=None, random_projection_seed=0
-    )
-    print(resnet50.training)
-    print(resnet50.model.training)
-    print(getattr(resnet50.image_loader, "training", None))
+# %%
+class ConvNeXtB(_PretrainedNN):
+    layer_names = [
+        "features.0",
+        "features.1",
+        "features.2",
+        "features.3",
+        "features.4",
+        "features.5",
+        "features.6",
+        "features.7",
+        "avgpool",
+        "classifier",
+    ]
+    def _load_modules(self):
+        """Load the ConvNeXt-B image loader and model."""
+        image_loader = StandardImageLoader()
+        model = torchvision.models.convnext_base(
+            weights=torchvision.models.ConvNeXt_Base_Weights.IMAGENET1K_V1
+        )
+        return image_loader, model
