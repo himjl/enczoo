@@ -2,10 +2,11 @@ import enczoo
 import PIL.Image
 import numpy as np
 
-model = enczoo.CLIPResNet50(layer_name="attnpool")
 
 np.random.seed(0)
 image = PIL.Image.fromarray(np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8))
+
+model = enczoo.CLIPResNet50(layer_name="attnpool")
 
 f = model.compute_features(images=[image])
 print(
