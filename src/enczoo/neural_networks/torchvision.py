@@ -77,7 +77,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
         image_loader, model = self._load_modules()
 
         # Ensure modules are in evaluation mode by default
-        image_loader.train(mode=False)
+        if isinstance(image_loader, torch.nn.Module):
+            image_loader.train(mode=False)
         model.train(mode=False)
 
         super().__init__(
@@ -96,6 +97,7 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             A tuple of (image_loader, model).
         """
         raise NotImplementedError
+
 
 # %%
 class AlexNet(_PretrainedNN):
@@ -157,6 +159,7 @@ class ResNet50(_PretrainedNN):
         )
         return image_loader, model
 
+
 # %%
 class ConvNeXtB(_PretrainedNN):
     layer_names = [
@@ -171,6 +174,7 @@ class ConvNeXtB(_PretrainedNN):
         "avgpool",
         "classifier",
     ]
+
     def _load_modules(self):
         """Load the ConvNeXt-B image loader and model."""
         image_loader = StandardImageLoader()
@@ -178,3 +182,38 @@ class ConvNeXtB(_PretrainedNN):
             weights=torchvision.models.ConvNeXt_Base_Weights.IMAGENET1K_V1
         )
         return image_loader, model
+
+
+class CLIPResNet50(_PretrainedNN):
+    """CLIP RN50 visual encoder with named layer outputs."""
+
+    # A subset of layers (each separated by one nonlinearity, except
+    # layer4.2.relu3 and attnpool, which are connected by attention pooling).
+    layer_names = [
+        "relu3",
+        "layer1.0.relu3",
+        "layer1.1.relu3",
+        "layer1.2.relu3",
+        "layer2.0.relu3",
+        "layer2.1.relu3",
+        "layer2.2.relu3",
+        "layer2.3.relu3",
+        "layer3.0.relu3",
+        "layer3.1.relu3",
+        "layer3.2.relu3",
+        "layer3.3.relu3",
+        "layer3.4.relu3",
+        "layer3.5.relu3",
+        "layer4.0.relu3",
+        "layer4.1.relu3",
+        "layer4.2.relu3",
+        "attnpool",
+    ]
+
+    def _load_modules(self):
+        """Load the CLIP RN50 image loader and visual model."""
+        import clip
+        model, image_loader = clip.load("RN50", device="cpu")
+        # The image_loader already performs the resizing and center-cropping without unnecessarily removing any content from the shorter dimension (i.e. resize 224, then center crops 224).
+        # It also has slightly different channel normalization constants so we can use it directly.
+        return image_loader, model.visual
