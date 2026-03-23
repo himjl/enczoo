@@ -27,6 +27,7 @@ enczoo is a stateless **library** with a single, simple goal: to compute interme
 - `make check`: run type checks (`ty`) and verify formatting/linting without fixes.
 - `make test`: run the unit test suite via `pytest tests`.
 - `make build`: clean `dist/` and build the package with `uv build`.
+- Before reporting back after a coding round, run `make lint` and `make check` at the end unless the user explicitly tells you not to.
 
 ## Coding Style & Naming Conventions
 - Python 3.12+, 4-space indentation, standard PEP 8 naming.
