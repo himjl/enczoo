@@ -213,6 +213,7 @@ class CLIPResNet50(_PretrainedNN):
     def _load_modules(self):
         """Load the CLIP RN50 image loader and visual model."""
         import clip
+
         model, image_loader = clip.load("RN50", device="cpu")
         # The image_loader already performs the resizing and center-cropping without unnecessarily removing any content from the shorter dimension (i.e. resize 224, then center crops 224).
         # It also has slightly different channel normalization constants so we can use it directly.
