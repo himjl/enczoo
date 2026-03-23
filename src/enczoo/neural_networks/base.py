@@ -7,7 +7,7 @@ import torch
 import torchvision
 
 from enczoo.base import ImageEncoding
-from enczoo.transforms.random_projection import RandomProjection
+from enczoo.random_projection import RandomProjection
 
 
 class ImageNeuralNetwork(ImageEncoding, ABC):
