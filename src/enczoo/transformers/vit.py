@@ -2,8 +2,7 @@ from typing import List
 
 import PIL.Image
 import torch
-import transformers
-
+import os
 from enczoo.base import ImageEncoding
 
 
@@ -14,10 +13,13 @@ class CLIPViTB16(ImageEncoding):
     output_dim = 768
 
     def __init__(self):
+        import transformers
+        transformers.logging.set_verbosity_error() # Supress warnings about extra weights in the model checkpoint, which are expected here as we only use the vision encoder part of the CLIP model.
+
         """Initialize the CLIP ViT-B/16 image encoder."""
         super().__init__(trainable=False)
         self.image_processor = transformers.AutoImageProcessor.from_pretrained(
-            self.model_id
+            self.model_id,
         )
         self.model = transformers.CLIPVisionModel.from_pretrained(self.model_id)
         self.model.train(mode=False)
