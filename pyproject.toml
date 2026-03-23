@@ -4,7 +4,7 @@ version = "0.1.1"
 description = "Map images (as `PIL.Images`) to intermediate representations (as `np.ndarray`) from off-the-shelf vision models."
 readme = "README.md"
 authors = [
-    { name = "himjl", email = "mil@mit.edu" }
+    { name = "Michael J. Lee", email = "mil@mit.edu" }
 ]
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
