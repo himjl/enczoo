@@ -5,6 +5,7 @@ __all__ = [
     "AlexNet",
     "ConvNeXtB",
     "CLIPResNet50",
+    "CLIPViTB16",
 ]
 
 
@@ -16,3 +17,4 @@ from enczoo.neural_networks.torchvision import (
     ResNet50,
 )
 from enczoo.classic.pixels import Pixels
+from enczoo.transformers import CLIPViTB16
