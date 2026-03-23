@@ -180,9 +180,16 @@ class ConvNeXtB(_PretrainedNN):
         return image_loader, model
 
 # %%
-
 if __name__ == "__main__":
+    import PIL.Image
+    import numpy as np
 
-    model = torchvision.models.convnext_base(
-        weights=torchvision.models.ConvNeXt_Base_Weights.IMAGENET1K_V1
+    model = ConvNeXtB(layer_name="classifier")
+
+    np.random.seed(0)
+    image = PIL.Image.fromarray(
+        np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
     )
+
+    f = model.compute_features(images=[image], flatten=True)
+

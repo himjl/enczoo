@@ -49,7 +49,7 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
             root_name: str,
             activations_dict: Dict[str, torch.Tensor],
         ) -> List[str]:
-            """Recursively register forward hooks on leaf modules.
+            """Recursively register forward hooks on named modules.
 
             Args:
                 module: Module whose children are walked.
@@ -61,7 +61,20 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
             """
             module_names = []
 
-            nchildren = 0
+            if root_name != "":
+                layer_name = root_name
+
+                if layer_name in activations_dict:
+                    raise Exception(
+                        f"Layer name {layer_name} already exists in hidden activations! Existing keys: {self._hidden_activations.keys()}"
+                    )
+
+                def hook_function(module: torch.nn.Module, args, output):
+                    activations_dict[layer_name] = output
+
+                module.register_forward_hook(hook_function)
+                module_names.append(layer_name)
+
             for module_name, submodule in module.named_children():
                 if module_name != "":
                     next_root_name = (
@@ -80,29 +93,7 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
                     activations_dict=activations_dict,
                 )
 
-                # Update the number of children
-                nchildren += 1
                 module_names.extend(submodule_names)
-
-            # Base case:
-            if nchildren == 0:
-                layer_name = root_name
-
-                if layer_name in activations_dict:
-                    # Don't think this should ever happen:
-                    raise Exception(
-                        f"Layer name {layer_name} already exists in hidden activations! Existing keys: {self._hidden_activations.keys()}"
-                    )
-
-                def hook_function(module: torch.nn.Module, args, output):
-                    # print(f'Hook called on {layer_name}')
-                    activations_dict[layer_name] = output
-
-                # Attach forward hook
-                module.register_forward_hook(hook_function)
-
-                # Base case: no children
-                module_names.append(layer_name)
             return module_names
 
         # Register forward hooks that will populate this dictionary with hidden activations on the forward pass:
@@ -113,7 +104,7 @@ class ImageNeuralNetwork(ImageEncoding, ABC):
 
         if layer_name not in self._layer_names:
             raise ValueError(
-                f"Layer name {layer_name} not found in model.\nAvailable layer names: {self._layer_names}"
+                f"Layer name {layer_name} not found in model.\nAvailable layer names: {'\n'.join(self._layer_names)}"
             )
 
         # Populate the sizes of the layers with a forward pass
