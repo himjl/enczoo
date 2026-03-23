@@ -5,7 +5,7 @@ import torch
 import torchvision.transforms.v2 as v2
 
 from enczoo.base import ImageEncoding
-from enczoo.transforms.random_projection import RandomProjection
+from enczoo.random_projection import RandomProjection
 
 
 # %%

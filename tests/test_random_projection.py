@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-import enczoo.transforms.random_projection as random_projection_layer
+import enczoo.random_projection as random_projection_layer
 import enczoo.utils as utils
 
 
