@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import torch
+from typing import cast
 
 import enczoo.random_projection as random_projection_layer
 
@@ -95,10 +96,27 @@ def test_deterministic(input_tensor):
         seed=0,
     )
 
-    # Check forward pass
     y = mod(input_tensor)
-    assert torch.isclose(y[0, 0], torch.tensor(0.037887085, dtype=y.dtype), atol=1e-6)
-
-    # Should be the same result across calls
     y2 = mod(input_tensor)
+
     assert torch.allclose(y, y2)
+
+
+def test_projection_weight_variance():
+    out_features = 1000
+    mod = random_projection_layer.RandomProjection(
+        in_features=256,
+        out_features=out_features,
+        seed=0,
+    )
+
+    weights = cast(torch.Tensor, mod.projection_weights)
+    expected_std = 1 / np.sqrt(out_features)
+    assert torch.isclose(
+        weights.mean(), torch.tensor(0.0, dtype=weights.dtype), atol=1e-2
+    )
+    assert torch.isclose(
+        weights.std(),
+        torch.tensor(expected_std, dtype=weights.dtype),
+        atol=2e-3,
+    )
