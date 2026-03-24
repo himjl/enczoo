@@ -12,10 +12,6 @@ This library is meant for those who need to compute off-the-shelf image features
 
     uv add enczoo
 
-You can also install `enczoo` using `pip` by running:
-
-    pip install enczoo
- 
 ### Usage 
 
 ```python
