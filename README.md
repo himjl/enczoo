@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/himjl/enczoo/actions/workflows/ci.yml/badge.svg)](https://github.com/himjl/enczoo/actions/workflows/ci.yml)
 
-`enczoo` is a Python library with a single goal: to map images (as `PIL.Images`) to features (as `np.ndarray`) from intermediate layers of off-the-shelf vision models, such as Imagenet-pretrained ResNet50 and CLIP ViT-B/16.
+`enczoo` is a Python library with a single goal: to map images (as `PIL.Images`) to features (as `np.ndarray`) extracted from off-the-shelf vision models, such as Imagenet-pretrained ResNet50 and CLIP ViT-B/16.
 
 This library is meant for those who need to compute off-the-shelf image features once for their project (and perhaps cache them elsewhere). 
 
