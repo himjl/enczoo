@@ -8,6 +8,7 @@ __all__ = [
     "CLIPViTB16",
     "DINOv2ViTB14",
     "AligNetViTB16",
+    "UnaligNetViTB16",
 ]
 
 
@@ -18,6 +19,6 @@ from enczoo.neural_networks.torchvision import (
     ConvNeXtB,
     ResNet50,
 )
-from enczoo.alignnet import AligNetViTB16
+from enczoo.alignnet import AligNetViTB16, UnaligNetViTB16
 from enczoo.classic.pixels import Pixels
 from enczoo.transformers import CLIPViTB16, DINOv2ViTB14

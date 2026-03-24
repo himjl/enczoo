@@ -13,10 +13,12 @@ from typing import Any, List
 import PIL.Image
 import numpy as np
 import tensorflow as tf
+from tqdm import tqdm
 
 from enczoo.base import ImageEncoding
 
 _CACHE_ENV_VAR = "ENCZOO_CACHE_DIR"
+_DOWNLOAD_CHUNK_SIZE = 1024 * 1024
 _MODEL_INPUT_SIZE = 224
 
 
@@ -41,7 +43,7 @@ class _AlignNet(ImageEncoding, ABC):
 
     model_name: str
     weights_url: str
-    output_key: str | None = None
+    output_key: str | None = "pre_logits"
 
     def __init__(self, cache_dir: str | Path | None = None):
         super().__init__()
@@ -104,7 +106,23 @@ class _AlignNet(ImageEncoding, ABC):
                 urllib.request.urlopen(url) as response,
                 temp_destination.open("wb") as file,
             ):
-                shutil.copyfileobj(response, file)
+                total_bytes_header = response.headers.get("Content-Length")
+                total_bytes = (
+                    int(total_bytes_header) if total_bytes_header is not None else None
+                )
+                with tqdm(
+                    total=total_bytes,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    desc=f"Downloading {destination.name}",
+                ) as progress:
+                    while True:
+                        chunk = response.read(_DOWNLOAD_CHUNK_SIZE)
+                        if not chunk:
+                            break
+                        file.write(chunk)
+                        progress.update(len(chunk))
             temp_destination.replace(destination)
         finally:
             temp_destination.unlink(missing_ok=True)
@@ -167,7 +185,12 @@ class _AlignNet(ImageEncoding, ABC):
 
     @staticmethod
     def _preprocess_image(image: PIL.Image.Image) -> np.ndarray:
-        """Convert a PIL image to a float32 BHWC-ready tensor."""
+        """Convert a PIL image to a float32 BHWC-ready tensor.
+
+        enczoo preserves the largest centered square crop by resizing the
+        shorter side to 224 and then center-cropping to 224x224 before scaling
+        values to [0, 1].
+        """
         image = image.convert("RGB")
         width, height = image.size
         scale = _MODEL_INPUT_SIZE / min(width, height)
@@ -190,7 +213,7 @@ class _AlignNet(ImageEncoding, ABC):
 
 
 class AligNetViTB16(_AlignNet):
-    """ViT-B/16 which has been pretrained on ImageNet, then aligned against human behavioral judgments using AlignNet distillation to match human visual representations across abstraction levels.
+    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from AlignNet (a teacher network tuned against human triplet judgments).
 
     Reference:
         Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
@@ -200,3 +223,18 @@ class AligNetViTB16(_AlignNet):
 
     model_name = "ViT-B-alignet"
     weights_url = "https://storage.googleapis.com/alignet/models/ViT-B-alignet.tar.gz"
+
+
+class UnaligNetViTB16(_AlignNet):
+    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from UnalignNet (which was _not_ tuned on human triplet judgments).
+
+    Reference:
+        Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
+        human visual representations across abstraction levels." Nature 647,
+        349-355 (2025). https://doi.org/10.1038/s41586-025-09631-6
+    """
+
+    model_name = "ViT-B-untransformed"
+    weights_url = (
+        "https://storage.googleapis.com/alignet/models/ViT-B-untransformed.tar.gz"
+    )
