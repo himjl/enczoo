@@ -80,6 +80,7 @@ class Pixels(TorchImageEncoding):
 
         # If random projection is enabled, apply it
         if self.random_projection is not None:
+            images_tensor = images_tensor.to(self.device)
             return self.random_projection(
                 images_tensor.reshape(images_tensor.shape[0], -1)
             )
