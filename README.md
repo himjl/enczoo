@@ -22,20 +22,18 @@ You can also install `enczoo` using `pip` by running:
 import enczoo
 import PIL.Image
 image = PIL.Image.open('my-image.png')
-
-model = enczoo.ResNet50(layer_name='avgpool') # try layer4, layer3, ...
+model = enczoo.ResNet50(layer_name='avgpool') 
 features = model.compute_features(images=[image]) # np.ndarray
-
 # Want another layer? Check out: print(enczoo.ResNet50.layer_names)
 ```
 
 ### Why develop `enczoo`?
 `enczoo` solves several tiny problems which make correctly computing image features more annoying and error-prone than it should be. For example, `enczoo` automatically: 
     
-* performs model-specific image normalization ("_was it -1 to 1, 0 to 1, or 0-255...? ImageNet channel normalization...?_"),
-* correctly encodes images ("_my image was in mode L, not RGB!_")
-* turns off batch normalization ("_was the model in training mode...?_")
-* extracts intermediate layers by name ("_how do I do that forward hook thing again...?_")
-* turns off autograd, and returns tensors as `np.ndarray` (no more `.cpu().numpy()`)
-* performs image cropping to fit images to the expected input tensor shape
+* performs model-specific image transforms ("_was it -1 to 1, 0 to 1, or 0-255...?_"),
+* ensures images are in RGB format 
+* puts the model in inference, not training, mode  
+* turns off autograd
+* returns tensors as `np.ndarray` (no more `.cpu().numpy()`)
+* resizes the image while preserving aspect ratio 
 * and more!
