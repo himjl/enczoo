@@ -1,5 +1,3 @@
-from typing import List
-
 import PIL.Image
 import numpy as np
 import pytest
@@ -129,7 +127,7 @@ def test_projection_weight_variance():
 class _ToyEncoding(ImageEncoding):
     def compute_features(
         self,
-        images: List[PIL.Image.Image],
+        images: list[PIL.Image.Image],
         flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:

@@ -1,5 +1,4 @@
 from abc import ABC
-from typing import Dict, List, Tuple
 
 import PIL.Image
 import numpy as np
@@ -42,8 +41,8 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         def register_hook(
             module: torch.nn.Module,
             root_name: str,
-            activations_dict: Dict[str, torch.Tensor],
-        ) -> List[str]:
+            activations_dict: dict[str, torch.Tensor],
+        ) -> list[str]:
             """Recursively register forward hooks on named modules.
 
             Args:
@@ -92,7 +91,7 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
             return module_names
 
         # Register forward hooks that will populate this dictionary with hidden activations on the forward pass:
-        self._hidden_activations: Dict[str, torch.Tensor] = {}
+        self._hidden_activations: dict[str, torch.Tensor] = {}
         self._layer_names = register_hook(
             model, root_name="", activations_dict=self._hidden_activations
         )
@@ -117,7 +116,7 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         self.image_loader = image_loader
         self.model = model
 
-    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
         """Convert images to network activations.
 
         Args:
@@ -144,6 +143,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         return f
 
     @property
-    def layer_name_to_shape(self) -> Dict[str, Tuple[int, ...]]:
+    def layer_name_to_shape(self) -> dict[str, tuple[int, ...]]:
         """Return a mapping of layer names to activation shapes."""
         return self._layer_to_shape

@@ -1,5 +1,3 @@
-from typing import List
-
 import PIL.Image
 import torch
 import torchvision.transforms.v2 as v2
@@ -39,7 +37,7 @@ class Pixels(TorchImageEncoding):
             ]
         )
 
-    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
         """Convert images to pixel features.
 
         Args:

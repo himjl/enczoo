@@ -8,7 +8,7 @@ import urllib.request
 from abc import ABC
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import PIL.Image
 import numpy as np
@@ -147,7 +147,7 @@ class _AlignNet(ImageEncoding, ABC):
 
     def compute_features(
         self,
-        images: List[PIL.Image.Image],
+        images: list[PIL.Image.Image],
         flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:

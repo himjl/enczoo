@@ -1,13 +1,14 @@
 import math
-from typing import Tuple, cast
+from typing import cast
 
+import PIL.Image
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from enczoo.base import ImageEncoding
-import PIL.Image
+
 
 class RandomProjectionLayer(nn.Module):
     """Apply a fixed random projection to a 2D input tensor."""
@@ -99,7 +100,7 @@ class RandomProjection(ImageEncoding):
         )
 
     @property
-    def output_shape(self) -> Tuple[int, ...]:
+    def output_shape(self) -> tuple[int, ...]:
         """Return the projected feature shape."""
         return (self.out_features,)
 

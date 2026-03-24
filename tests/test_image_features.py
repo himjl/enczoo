@@ -1,6 +1,6 @@
 import os
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List
 
 import PIL.Image
 import numpy as np
@@ -19,7 +19,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.fixture
-def test_images() -> List[PIL.Image.Image]:
+def test_images() -> list[PIL.Image.Image]:
     imagesdir = _dir / "test_images"
     images = []
     for path in sorted(imagesdir.glob("*.png")):

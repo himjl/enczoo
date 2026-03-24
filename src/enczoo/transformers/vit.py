@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 import PIL.Image
 import torch
@@ -47,7 +46,7 @@ class _HuggingFaceViT(TorchImageEncoding, ABC):
         """Return a human-readable feature name for error messages."""
         raise NotImplementedError
 
-    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
         """Convert images to pooled transformer features."""
         inputs = self.image_processor(images=images, return_tensors="pt")
         pixel_values = inputs["pixel_values"].to(self.device)

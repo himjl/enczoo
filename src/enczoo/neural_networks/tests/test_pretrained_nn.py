@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 import PIL.Image
 import numpy as np
@@ -21,7 +20,7 @@ def alexnet():
 
 
 @pytest.fixture
-def images() -> List[PIL.Image.Image]:
+def images() -> list[PIL.Image.Image]:
     np.random.seed(0)
     img_dat1 = PIL.Image.fromarray(
         np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
