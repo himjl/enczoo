@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from enczoo.base import ImageEncoding
-
+import PIL.Image
 
 class RandomProjectionLayer(nn.Module):
     """Apply a fixed random projection to a 2D input tensor."""
@@ -105,7 +105,7 @@ class RandomProjection(ImageEncoding):
 
     def compute_features(
         self,
-        images,
+        images: list[PIL.Image.Image],
         flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
