@@ -6,11 +6,11 @@ import numpy as np
 import torch
 import torchvision
 
-from enczoo.base import ImageEncoding
+from enczoo.base import TorchImageEncoding
 from enczoo.random_projection import RandomProjection
 
 
-class ImageNeuralNetwork(ImageEncoding, ABC):
+class ImageNeuralNetwork(TorchImageEncoding, ABC):
     """Image encoding backed by a torch neural network."""
 
     def __init__(

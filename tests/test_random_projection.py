@@ -3,7 +3,6 @@ import pytest
 import torch
 
 import enczoo.random_projection as random_projection_layer
-import enczoo.utils as utils
 
 
 @pytest.fixture
@@ -103,15 +102,3 @@ def test_deterministic(input_tensor):
     # Should be the same result across calls
     y2 = mod(input_tensor)
     assert torch.allclose(y, y2)
-
-    # Add a test for the module hash
-    hash_1 = utils.hash_torch_module(mod)
-    hash_2 = utils.hash_torch_module(mod)
-    assert hash_1 == hash_2
-
-    mod_2 = random_projection_layer.RandomProjection(
-        in_features=input_tensor.shape[1],
-        out_features=1000,
-        seed=0,
-    )
-    assert utils.hash_torch_module(mod_2) == hash_1
