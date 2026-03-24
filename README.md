@@ -20,8 +20,9 @@ You can also install `enczoo` using `pip` by running:
 
 ```python
 import enczoo
-import PIL.Image
-image = PIL.Image.open('my-image.png')
+from PIL import Image
+
+image = Image.open('my-image.png')
 model = enczoo.ResNet50(layer_name='avgpool') 
 features = model.compute_features(images=[image]) # np.ndarray
 # Want another layer? Check out: print(enczoo.ResNet50.layer_names)
