@@ -46,7 +46,7 @@ class RandomProjection(nn.Module):
                 size=(out_features, in_features),
                 dtype=torch.float32,
                 requires_grad=False,
-            ) / math.sqrt(in_features * out_features)
+            ) / math.sqrt(out_features)
 
         self.register_buffer("projection_weights", weights)
 
