@@ -4,12 +4,12 @@ import PIL.Image
 import torch
 import torchvision.transforms.v2 as v2
 
-from enczoo.base import ImageEncoding
+from enczoo.base import TorchImageEncoding
 from enczoo.random_projection import RandomProjection
 
 
 # %%
-class Pixels(ImageEncoding):
+class Pixels(TorchImageEncoding):
     """Encode images by their resized center-crop pixels."""
 
     def __init__(

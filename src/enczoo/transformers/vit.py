@@ -5,10 +5,10 @@ import PIL.Image
 import torch
 import transformers
 
-from enczoo.base import ImageEncoding
+from enczoo.base import TorchImageEncoding
 
 
-class _HuggingFaceViT(ImageEncoding, ABC):
+class _HuggingFaceViT(TorchImageEncoding, ABC):
     """Base class for Hugging Face vision-transformer encoders."""
 
     model_id: str
@@ -18,7 +18,7 @@ class _HuggingFaceViT(ImageEncoding, ABC):
 
     def __init__(self):
         """Initialize the image processor and model."""
-        super().__init__(trainable=False)
+        super().__init__()
 
         if self.suppress_transformers_load_logging:
             # CLIP checkpoints on HF include text-side weights we intentionally ignore.
