@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/himjl/enczoo/actions/workflows/ci.yml/badge.svg)](https://github.com/himjl/enczoo/actions/workflows/ci.yml)
 
-`enczoo` is a Python library with a single goal: to map images (as `PIL.Images`) to features (as `np.ndarray`) from intermediate layers of off-the-shelf vision models, such as AlexNet and ResNet50.
+`enczoo` is a Python library with a single goal: to map images (as `PIL.Images`) to features (as `np.ndarray`) from intermediate layers of off-the-shelf vision models, such as Imagenet-pretrained ResNet50 and CLIP ViT-B/16.
 
 This library is meant for those who need to compute off-the-shelf image features once for their project (and perhaps cache them elsewhere). 
 
@@ -27,6 +27,7 @@ model = enczoo.ResNet50(layer_name='avgpool')
 features = model.compute_features(images=[image]) # np.ndarray
 # Want another layer? Check out: print(enczoo.ResNet50.layer_names)
 ```
+
 
 ### Why develop `enczoo`?
 `enczoo` solves several tiny problems which make correctly computing image features more annoying and error-prone than it should be. For example, `enczoo` automatically: 
