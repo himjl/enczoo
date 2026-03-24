@@ -1,8 +1,10 @@
+import os
+from pathlib import Path
+from typing import Callable, List
+
 import PIL.Image
 import numpy as np
 import pytest
-from pathlib import Path
-from typing import List, Callable
 
 import enczoo
 
@@ -10,6 +12,12 @@ _dir = Path(__file__).parent
 
 
 # %%
+pytestmark = pytest.mark.skipif(
+    os.environ.get("GITHUB_ACTIONS") == "true",
+    reason="Skipped on GitHub Actions because this test loads heavyweight pretrained models.",
+)
+
+
 @pytest.fixture
 def test_images() -> List[PIL.Image.Image]:
     imagesdir = _dir / "test_images"

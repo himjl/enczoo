@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import PIL.Image
@@ -6,6 +7,12 @@ import pytest
 import torch
 
 from enczoo import AlexNet
+
+
+pytestmark = pytest.mark.skipif(
+    os.environ.get("GITHUB_ACTIONS") == "true",
+    reason="Skipped on GitHub Actions because this test loads heavyweight pretrained models.",
+)
 
 
 @pytest.fixture
