@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 import PIL.Image
 import numpy as np
@@ -17,15 +16,11 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture
 def alexnet():
-    return AlexNet(
-        layer_name=AlexNet.layer_names[-1],
-        random_projection_dim=None,
-        random_projection_seed=0,
-    )
+    return AlexNet(layer_name=AlexNet.layer_names[-1])
 
 
 @pytest.fixture
-def images() -> List[PIL.Image.Image]:
+def images() -> list[PIL.Image.Image]:
     np.random.seed(0)
     img_dat1 = PIL.Image.fromarray(
         np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)

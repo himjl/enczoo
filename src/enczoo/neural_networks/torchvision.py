@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 
 import PIL.Image
 import torch
@@ -51,20 +50,16 @@ class StandardImageLoader(torch.nn.Module):
 class _PretrainedNN(ImageNeuralNetwork, ABC):
     """Base class for pretrained torchvision encoders."""
 
-    layer_names: List[str]
+    layer_names: list[str]
 
     def __init__(
         self,
         layer_name: str,
-        random_projection_dim: int | None = None,
-        random_projection_seed: int | None = None,
     ):
         """Initialize a pretrained encoder.
 
         Args:
             layer_name: Name of the layer whose activations are returned.
-            random_projection_dim: Optional output dimension for projection.
-            random_projection_seed: Seed for projection weights.
 
         Raises:
             ValueError: If the layer name is invalid.
@@ -85,12 +80,10 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             image_loader=image_loader,
             model=model,
             layer_name=layer_name,
-            random_projection_dim=random_projection_dim,
-            random_projection_seed=random_projection_seed,
         )
 
     @abstractmethod
-    def _load_modules(self) -> Tuple[torch.nn.Module, torch.nn.Module]:
+    def _load_modules(self) -> tuple[torch.nn.Module, torch.nn.Module]:
         """Load the image loader and model for this network.
 
         Returns:

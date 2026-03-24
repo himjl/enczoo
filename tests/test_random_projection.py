@@ -1,8 +1,10 @@
+import PIL.Image
 import numpy as np
 import pytest
 import torch
 from typing import cast
 
+from enczoo.base import ImageEncoding
 import enczoo.random_projection as random_projection_layer
 
 
@@ -90,7 +92,7 @@ def input_tensor() -> torch.Tensor:
 
 
 def test_deterministic(input_tensor):
-    mod = random_projection_layer.RandomProjection(
+    mod = random_projection_layer.RandomProjectionLayer(
         in_features=input_tensor.shape[1],
         out_features=1000,
         seed=0,
@@ -104,7 +106,7 @@ def test_deterministic(input_tensor):
 
 def test_projection_weight_variance():
     out_features = 1000
-    mod = random_projection_layer.RandomProjection(
+    mod = random_projection_layer.RandomProjectionLayer(
         in_features=256,
         out_features=out_features,
         seed=0,
@@ -120,3 +122,40 @@ def test_projection_weight_variance():
         torch.tensor(expected_std, dtype=weights.dtype),
         atol=2e-3,
     )
+
+
+class _ToyEncoding(ImageEncoding):
+    def compute_features(
+        self,
+        images: list[PIL.Image.Image],
+        flatten: bool = False,
+        seed: int | None = None,
+    ) -> np.ndarray:
+        del seed
+        self.validate_images(images)
+        features = np.arange(len(images) * 6, dtype=np.float32).reshape(
+            len(images), 2, 3
+        )
+        if flatten:
+            return features.reshape(len(images), -1)
+        return features
+
+
+def test_projection_wrapper_matches_projection_layer():
+    image = PIL.Image.fromarray(np.zeros((8, 8, 3), dtype=np.uint8))
+    encoder = _ToyEncoding()
+    projected = random_projection_layer.RandomProjection(
+        encoder=encoder,
+        out_features=4,
+        seed=7,
+    )
+
+    result = projected.compute_features(images=[image, image], flatten=False)
+    expected = random_projection_layer.RandomProjectionLayer(
+        in_features=6,
+        out_features=4,
+        seed=7,
+    )(torch.from_numpy(encoder.compute_features(images=[image, image], flatten=True)))
+
+    assert result.shape == (2, 4)
+    assert np.allclose(result, expected.detach().cpu().numpy())

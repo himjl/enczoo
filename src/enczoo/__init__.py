@@ -1,5 +1,6 @@
 __all__ = [
     "ImageEncoding",
+    "RandomProjection",
     "Pixels",
     "ResNet50",
     "AlexNet",
@@ -21,4 +22,5 @@ from enczoo.neural_networks.torchvision import (
 )
 from enczoo.alignnet import AligNetViTB16, UnaligNetViTB16
 from enczoo.classic.pixels import Pixels
+from enczoo.random_projection import RandomProjection
 from enczoo.transformers import CLIPViTB16, DINOv2ViTB14

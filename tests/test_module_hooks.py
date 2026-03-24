@@ -35,8 +35,6 @@ def test_supports_non_leaf_module_hooks():
         image_loader=_ImageToTensor(),
         model=_ToyModel(),
         layer_name="head",
-        random_projection_dim=None,
-        random_projection_seed=None,
     )
 
     assert "head" in encoder.layer_name_to_shape

@@ -1,6 +1,6 @@
 import os
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List
 
 import PIL.Image
 import numpy as np
@@ -19,7 +19,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.fixture
-def test_images() -> List[PIL.Image.Image]:
+def test_images() -> list[PIL.Image.Image]:
     imagesdir = _dir / "test_images"
     images = []
     for path in sorted(imagesdir.glob("*.png")):
@@ -44,26 +44,26 @@ def test_images() -> List[PIL.Image.Image]:
         ),
         (
             "target_rn50_avgpool_proj20_seed0.npy",
-            lambda: enczoo.ResNet50(
-                layer_name="avgpool",
-                random_projection_dim=20,
-                random_projection_seed=0,
+            lambda: enczoo.RandomProjection(
+                encoder=enczoo.ResNet50(layer_name="avgpool"),
+                out_features=20,
+                seed=0,
             ),
         ),
         (
             "target_rn50_avgpool_proj1000_seed0.npy",
-            lambda: enczoo.ResNet50(
-                layer_name="avgpool",
-                random_projection_dim=1000,
-                random_projection_seed=0,
+            lambda: enczoo.RandomProjection(
+                encoder=enczoo.ResNet50(layer_name="avgpool"),
+                out_features=1000,
+                seed=0,
             ),
         ),
         (
             "target_rn50_avgpool_proj1000_seed1.npy",
-            lambda: enczoo.ResNet50(
-                layer_name="avgpool",
-                random_projection_dim=1000,
-                random_projection_seed=1,
+            lambda: enczoo.RandomProjection(
+                encoder=enczoo.ResNet50(layer_name="avgpool"),
+                out_features=1000,
+                seed=1,
             ),
         ),
     ],

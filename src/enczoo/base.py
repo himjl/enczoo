@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 
 import PIL.Image
 import numpy as np
@@ -14,7 +13,7 @@ class ImageEncoding(ABC):
         self._output_shape = None
 
     @property
-    def output_shape(self) -> Tuple[int, ...]:
+    def output_shape(self) -> tuple[int, ...]:
         """Return the output feature shape (excluding batch dimension)."""
         if self._output_shape is None:
             test_image = PIL.Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
@@ -37,7 +36,7 @@ class ImageEncoding(ABC):
         return self._output_shape
 
     @staticmethod
-    def validate_images(images: List[PIL.Image.Image]) -> None:
+    def validate_images(images: list[PIL.Image.Image]) -> None:
         """Validate that the input is a non-empty image list."""
         if not isinstance(images, list):
             raise ValueError(
@@ -59,7 +58,7 @@ class ImageEncoding(ABC):
     @abstractmethod
     def compute_features(
         self,
-        images: List[PIL.Image.Image],
+        images: list[PIL.Image.Image],
         flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
@@ -100,7 +99,7 @@ class TorchImageEncoding(torch.nn.Module, ImageEncoding, ABC):
 
     def compute_features(
         self,
-        images: List[PIL.Image.Image],
+        images: list[PIL.Image.Image],
         flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
@@ -119,7 +118,7 @@ class TorchImageEncoding(torch.nn.Module, ImageEncoding, ABC):
 
     def forward(
         self,
-        images: List[PIL.Image.Image],
+        images: list[PIL.Image.Image],
         flatten: bool = False,
     ) -> torch.Tensor:
         """Compute torch features for a batch of images."""
@@ -130,6 +129,6 @@ class TorchImageEncoding(torch.nn.Module, ImageEncoding, ABC):
         return feats
 
     @abstractmethod
-    def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
+    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
         """Convert images to torch features."""
         raise NotImplementedError
