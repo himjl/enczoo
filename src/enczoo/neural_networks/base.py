@@ -7,7 +7,6 @@ import torch
 import torchvision
 
 from enczoo.base import TorchImageEncoding
-from enczoo.random_projection import RandomProjection
 
 
 class ImageNeuralNetwork(TorchImageEncoding, ABC):
@@ -18,8 +17,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         image_loader: torch.nn.Module | torchvision.transforms.Compose,
         model: torch.nn.Module,
         layer_name: str,
-        random_projection_dim: int | None,
-        random_projection_seed: int | None,
     ):
         """Initialize the neural network encoder.
 
@@ -27,8 +24,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
             image_loader: Module that converts PIL images to model inputs.
             model: Torch model used to compute activations.
             layer_name: Name of the layer whose activations are returned.
-            random_projection_dim: Optional output dimension for projection.
-            random_projection_seed: Seed for projection weights.
 
         Raises:
             ValueError: If the layer name is not found.
@@ -122,19 +117,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         self.image_loader = image_loader
         self.model = model
 
-        if random_projection_dim is not None:
-            if random_projection_seed is None:
-                raise ValueError(
-                    "random_projection_seed must be provided if random_projection_dim is not None!"
-                )
-            self.random_projection = RandomProjection(
-                seed=random_projection_seed,
-                in_features=int(np.prod(self._layer_to_shape[layer_name])),
-                out_features=random_projection_dim,
-            )
-        else:
-            self.random_projection = None
-
     def _images_to_features(self, images: List[PIL.Image.Image]) -> torch.Tensor:
         """Convert images to network activations.
 
@@ -158,14 +140,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
 
         # Retrieve the activations for the given layer
         f = self._hidden_activations[self._layer_name]
-
-        # Perform random projection if requested
-        if self.random_projection is not None:
-            # Flatten the features
-            f = f.reshape(f.shape[0], -1)
-
-            # Run the random projection forward
-            f = self.random_projection(f)
 
         return f
 

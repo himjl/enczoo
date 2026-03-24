@@ -17,11 +17,7 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture
 def alexnet():
-    return AlexNet(
-        layer_name=AlexNet.layer_names[-1],
-        random_projection_dim=None,
-        random_projection_seed=0,
-    )
+    return AlexNet(layer_name=AlexNet.layer_names[-1])
 
 
 @pytest.fixture

@@ -56,15 +56,11 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
     def __init__(
         self,
         layer_name: str,
-        random_projection_dim: int | None = None,
-        random_projection_seed: int | None = None,
     ):
         """Initialize a pretrained encoder.
 
         Args:
             layer_name: Name of the layer whose activations are returned.
-            random_projection_dim: Optional output dimension for projection.
-            random_projection_seed: Seed for projection weights.
 
         Raises:
             ValueError: If the layer name is invalid.
@@ -85,8 +81,6 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             image_loader=image_loader,
             model=model,
             layer_name=layer_name,
-            random_projection_dim=random_projection_dim,
-            random_projection_seed=random_projection_seed,
         )
 
     @abstractmethod
