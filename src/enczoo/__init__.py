@@ -31,5 +31,3 @@ from enczoo.neural_networks.torchvision import (
 )
 from enczoo.random_projection import RandomProjection
 from enczoo.transformers import CLIPViTB16, DINOv2ViTB14
-
-
