@@ -12,7 +12,7 @@ from typing import Any
 
 import PIL.Image
 import numpy as np
-import tensorflow as tf
+
 from tqdm import tqdm
 
 from enczoo.base import ImageEncoding
@@ -46,6 +46,8 @@ class _AlignNet(ImageEncoding, ABC):
     output_key: str | None = "pre_logits"
 
     def __init__(self, cache_dir: str | Path | None = None):
+        import tensorflow as tf
+
         super().__init__()
         self.model_dir = self._ensure_model_dir(cache_dir=cache_dir)
         self.model = tf.saved_model.load(export_dir=str(self.model_dir))
@@ -154,6 +156,7 @@ class _AlignNet(ImageEncoding, ABC):
         """Compute AlignNet features as a NumPy array."""
         del seed
         self.validate_images(images)
+        import tensorflow as tf
 
         batch = np.stack([self._preprocess_image(image) for image in images], axis=0)
         outputs = self.forward(images=tf.convert_to_tensor(batch))

@@ -1,10 +1,9 @@
-# `enczoo`: a zoo of encoding models for images
+# `enczoo`: easily extract image features from pretrained vision models
 
 [![CI](https://github.com/himjl/enczoo/actions/workflows/ci.yml/badge.svg)](https://github.com/himjl/enczoo/actions/workflows/ci.yml)
 
-`enczoo` is a Python library with a single goal: to map images (as `PIL.Images`) to features (as `numpy` arrays) extracted from off-the-shelf vision models, such as Imagenet-pretrained ResNet50 and CLIP ViT-B/16.
-
-This library is meant for those who need to compute off-the-shelf image features once for their project.
+`enczoo` is a Python library with a single goal: to enable you to map images (as `PIL.Images`) to image features (as `numpy` arrays) as easily as possible. 
+Features may be extracted from a zoo of popular, pretrained vision models, such as Imagenet-pretrained ResNet50 and CLIP ViT-B/16. 
 
 ### Installation
 
@@ -26,7 +25,7 @@ features = model.compute_features(images=[image]) # np.ndarray
 
 
 ### Why develop `enczoo`?
-`enczoo` solves several tiny problems which make correctly computing image features more annoying and error-prone than it should be. For example, `enczoo` automatically: 
+Under the hood, `enczoo` solves several tiny problems which make correctly computing image features more annoying and error-prone than it should be. For example, `enczoo` automatically: 
     
 * performs model-specific image transforms ("_was it -1 to 1, 0 to 1, or 0-255...?_"),
 * ensures images are in RGB format 
