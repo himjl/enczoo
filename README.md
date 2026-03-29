@@ -1,4 +1,4 @@
-# `enczoo`: easily extract image features
+# `enczoo`: easily extract image features from pretrained vision models
 
 [![CI](https://github.com/himjl/enczoo/actions/workflows/ci.yml/badge.svg)](https://github.com/himjl/enczoo/actions/workflows/ci.yml)
 
