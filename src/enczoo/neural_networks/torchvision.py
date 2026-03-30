@@ -5,6 +5,7 @@ import torch
 import torchvision.models
 import torchvision.transforms.functional as F
 
+from enczoo.base import DeviceType
 from enczoo.neural_networks.base import ImageNeuralNetwork
 
 
@@ -55,11 +56,15 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
     def __init__(
         self,
         layer_name: str,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
     ):
         """Initialize a pretrained encoder.
 
         Args:
             layer_name: Name of the layer whose activations are returned.
+            device: Whether computations should run on the CPU or a GPU.
+            device_index: Optional zero-based GPU index used when device="gpu".
 
         Raises:
             ValueError: If the layer name is invalid.
@@ -80,6 +85,8 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
             image_loader=image_loader,
             model=model,
             layer_name=layer_name,
+            device=device,
+            device_index=device_index,
         )
 
     @abstractmethod

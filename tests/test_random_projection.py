@@ -2,9 +2,10 @@ import PIL.Image
 import numpy as np
 import pytest
 import torch
-from typing import cast
+from typing import Any, cast
 
 from enczoo.base import ImageEncoding
+from enczoo.classic.pixels import Pixels
 import enczoo.random_projection as random_projection_layer
 
 
@@ -139,6 +140,25 @@ class _ToyEncoding(ImageEncoding):
         if flatten:
             return features.reshape(len(images), -1)
         return features
+
+
+def test_device_index_requires_gpu():
+    with pytest.raises(ValueError, match="device_index can only be set"):
+        _ToyEncoding(device_index=0)
+
+
+def test_unknown_device_raises():
+    with pytest.raises(ValueError, match="Unknown device"):
+        _ToyEncoding(device=cast(Any, "tpu"))
+
+
+def test_resolve_requested_cuda_device(monkeypatch):
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 2)
+
+    encoder = Pixels(device="gpu", device_index=1)
+
+    assert encoder.torch_device == torch.device("cuda:1")
 
 
 def test_projection_wrapper_matches_projection_layer():

@@ -15,7 +15,8 @@ import numpy as np
 
 from tqdm import tqdm
 
-from enczoo.base import ImageEncoding
+from enczoo.base import DeviceType
+from enczoo.tensorflow_base import TensorflowImageEncoding
 
 _CACHE_ENV_VAR = "ENCZOO_CACHE_DIR"
 _DOWNLOAD_CHUNK_SIZE = 1024 * 1024
@@ -38,20 +39,26 @@ def _default_cache_dir() -> Path:
     return Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "enczoo"
 
 
-class _AlignNet(ImageEncoding, ABC):
+class _AlignNet(TensorflowImageEncoding, ABC):
     """TensorFlow SavedModel-backed AlignNet encoder."""
 
     model_name: str
     weights_url: str
     output_key: str | None = "pre_logits"
 
-    def __init__(self, cache_dir: str | Path | None = None):
+    def __init__(
+        self,
+        cache_dir: str | Path | None = None,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
         import tensorflow as tf
 
-        super().__init__()
+        super().__init__(device=device, device_index=device_index)
         self.model_dir = self._ensure_model_dir(cache_dir=cache_dir)
-        self.model = tf.saved_model.load(export_dir=str(self.model_dir))
-        self.forward = self.model.signatures["serving_default"]
+        with tf.device(self.tensorflow_device_name):
+            self.model = tf.saved_model.load(export_dir=str(self.model_dir))
+            self._forward = self.model.signatures["serving_default"]
 
     @classmethod
     def _resolve_model_dir(cls, cache_dir: str | Path | None) -> Path:
@@ -159,7 +166,8 @@ class _AlignNet(ImageEncoding, ABC):
         import tensorflow as tf
 
         batch = np.stack([self._preprocess_image(image) for image in images], axis=0)
-        outputs = self.forward(images=tf.convert_to_tensor(batch))
+        with tf.device(self.tensorflow_device_name):
+            outputs = self._forward(images=tf.convert_to_tensor(batch))
         features = self._select_features(outputs=outputs)
         if flatten:
             features = features.reshape(features.shape[0], -1)

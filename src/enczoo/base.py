@@ -1,16 +1,41 @@
 from abc import ABC, abstractmethod
+from typing import Literal
 
 import PIL.Image
 import numpy as np
-import torch
+
+DeviceType = Literal["cpu", "gpu"]
 
 
 class ImageEncoding(ABC):
     """Framework-agnostic interface for mapping PIL images to NumPy features."""
 
-    def __init__(self):
-        """Initialize cached metadata."""
-        self._output_shape = None
+    def __init__(
+        self,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
+        """Initialize cached metadata and execution-device preferences.
+
+        Args:
+            device: Whether computations should run on the CPU or a GPU.
+            device_index: Optional zero-based GPU index. This is only valid when
+                device="gpu".
+        """
+        self._output_shape: tuple[int, ...] | None = None
+        self._device = device
+        self._device_index = device_index
+        self._validate_device_configuration()
+
+    @property
+    def device(self) -> DeviceType:
+        """Return the requested backend-neutral device kind."""
+        return self._device
+
+    @property
+    def device_index(self) -> int | None:
+        """Return the requested zero-based GPU index, if any."""
+        return self._device_index
 
     @property
     def output_shape(self) -> tuple[int, ...]:
@@ -77,58 +102,23 @@ class ImageEncoding(ABC):
         """
         raise NotImplementedError
 
+    def _validate_device_configuration(self) -> None:
+        """Validate the backend-neutral device configuration."""
+        if self._device not in {"cpu", "gpu"}:
+            raise ValueError(
+                f"Unknown device: {self._device}. Expected 'cpu' or 'gpu'."
+            )
 
-class TorchImageEncoding(torch.nn.Module, ImageEncoding, ABC):
-    """Torch-backed image encoder that implements NumPy conversion."""
+        if self._device_index is not None:
+            if not isinstance(self._device_index, int):
+                raise ValueError(
+                    "device_index must be an int or None, "
+                    f"but got {type(self._device_index)}."
+                )
+            if self._device_index < 0:
+                raise ValueError(
+                    f"device_index must be non-negative, but got {self._device_index}."
+                )
 
-    def __init__(self):
-        """Initialize the torch module and shared metadata."""
-        torch.nn.Module.__init__(self)
-        ImageEncoding.__init__(self)
-
-    @property
-    def device(self) -> torch.device:
-        """Infer the device from the first parameter or buffer."""
-        try:
-            return next(self.parameters()).device
-        except StopIteration:
-            try:
-                return next(self.buffers()).device
-            except StopIteration:
-                return torch.device("cpu")
-
-    def compute_features(
-        self,
-        images: list[PIL.Image.Image],
-        flatten: bool = False,
-        seed: int | None = None,
-    ) -> np.ndarray:
-        """Compute features and return them as a NumPy array."""
-        self.validate_images(images)
-
-        with torch.random.fork_rng():
-            if seed is not None:
-                torch.manual_seed(seed)
-                if torch.cuda.is_available():
-                    torch.cuda.manual_seed_all(seed)
-            with torch.no_grad():
-                torch_features = self(images=images, flatten=flatten)
-                numpy_features = torch_features.detach().cpu().numpy()
-        return numpy_features
-
-    def forward(
-        self,
-        images: list[PIL.Image.Image],
-        flatten: bool = False,
-    ) -> torch.Tensor:
-        """Compute torch features for a batch of images."""
-        self.validate_images(images)
-        feats = self._images_to_features(images=images)
-        if flatten:
-            feats = feats.reshape(feats.shape[0], -1)
-        return feats
-
-    @abstractmethod
-    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
-        """Convert images to torch features."""
-        raise NotImplementedError
+        if self._device == "cpu" and self._device_index is not None:
+            raise ValueError("device_index can only be set when device='gpu'.")

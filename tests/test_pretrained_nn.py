@@ -47,10 +47,10 @@ def test_default_is_not_training(alexnet):
 
 def test_alexnet_forward(alexnet, image_batch1, image_batch2):
     # Test output is deterministic
-    result = alexnet(images=image_batch1)
-    result2 = alexnet(images=image_batch1)
+    result = alexnet.forward(images=image_batch1)
+    result2 = alexnet.forward(images=image_batch1)
     assert torch.allclose(result, result2)
 
     # Test output does not depend on batch size
-    result_bigger_batch = alexnet(images=image_batch2)
+    result_bigger_batch = alexnet.forward(images=image_batch2)
     assert torch.allclose(result[0], result_bigger_batch[0], rtol=1e-3)

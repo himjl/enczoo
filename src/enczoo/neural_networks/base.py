@@ -5,7 +5,8 @@ import numpy as np
 import torch
 import torchvision
 
-from enczoo.base import TorchImageEncoding
+from enczoo.base import DeviceType
+from enczoo.torch_base import TorchImageEncoding
 
 
 class ImageNeuralNetwork(TorchImageEncoding, ABC):
@@ -16,6 +17,8 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         image_loader: torch.nn.Module | torchvision.transforms.Compose,
         model: torch.nn.Module,
         layer_name: str,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
     ):
         """Initialize the neural network encoder.
 
@@ -23,19 +26,19 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
             image_loader: Module that converts PIL images to model inputs.
             model: Torch model used to compute activations.
             layer_name: Name of the layer whose activations are returned.
+            device: Whether computations should run on the CPU or a GPU.
+            device_index: Optional zero-based GPU index used when device="gpu".
 
         Raises:
             ValueError: If the layer name is not found.
         """
-        super().__init__()
+        super().__init__(device=device, device_index=device_index)
 
         # Ensure modules will be registered in evaluation mode
-        self.train(mode=False)
+        if isinstance(image_loader, torch.nn.Module):
+            image_loader.train(mode=False)
+        model.train(mode=False)
 
-        # Register buffers to ensure the model's hash is distinctive for each layer
-        self.register_buffer(
-            "layer_name", torch.tensor([ord(c) for c in layer_name], dtype=torch.int16)
-        )
         self._layer_name = layer_name  # Needed for the forward pass
 
         def register_hook(
@@ -114,17 +117,23 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
 
         # Register modules
         self.image_loader = image_loader
-        self.model = model
+        self.model = model.to(self.torch_device)
 
-    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
+    def _images_to_features(
+        self,
+        images: list[PIL.Image.Image],
+        seed: int | None = None,
+    ) -> torch.Tensor:
         """Convert images to network activations.
 
         Args:
             images: A list of PIL.Image.Image.
+            seed: Unused backend seed forwarded for API consistency.
 
         Returns:
             A torch.Tensor of shape [B, *].
         """
+        del seed
 
         # Preprocess the images
         preprocessed_images = torch.stack(
@@ -132,7 +141,7 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         )
 
         # Transfer to the correct device
-        preprocessed_images = preprocessed_images.to(self.device)
+        preprocessed_images = preprocessed_images.to(self.torch_device)
 
         # Run the forward pass
         self.model(preprocessed_images)
