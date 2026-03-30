@@ -4,7 +4,7 @@ import PIL.Image
 import torch
 import transformers
 
-from enczoo.base import TorchImageEncoding
+from enczoo.base import DeviceType, TorchImageEncoding
 
 
 class _HuggingFaceViT(TorchImageEncoding, ABC):
@@ -15,20 +15,22 @@ class _HuggingFaceViT(TorchImageEncoding, ABC):
     use_fast_processor: bool = False
     suppress_transformers_load_logging: bool = False
 
-    def __init__(self):
+    def __init__(
+        self,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
         """Initialize the image processor and model."""
-        super().__init__()
-
+        super().__init__(device=device, device_index=device_index)
         if self.suppress_transformers_load_logging:
-            # CLIP checkpoints on HF include text-side weights we intentionally ignore.
             transformers.logging.set_verbosity_error()
-
         self.image_processor = transformers.AutoImageProcessor.from_pretrained(
             self.model_id,
             use_fast=self.use_fast_processor,
         )
-        self.model = self._load_model()
-        self.model.train(mode=False)
+        model = self._load_model()
+        model.train(mode=False)
+        self.model = model.to(self.torch_device)
 
     @abstractmethod
     def _load_model(self) -> torch.nn.Module:
@@ -46,10 +48,13 @@ class _HuggingFaceViT(TorchImageEncoding, ABC):
         """Return a human-readable feature name for error messages."""
         raise NotImplementedError
 
-    def _images_to_features(self, images: list[PIL.Image.Image]) -> torch.Tensor:
+    def _images_to_features(
+        self,
+        images: list[PIL.Image.Image],
+    ) -> torch.Tensor:
         """Convert images to pooled transformer features."""
         inputs = self.image_processor(images=images, return_tensors="pt")
-        pixel_values = inputs["pixel_values"].to(self.device)
+        pixel_values = inputs["pixel_values"].to(self.torch_device)
 
         outputs = self.model(pixel_values=pixel_values)
         features = self._select_features(outputs=outputs)

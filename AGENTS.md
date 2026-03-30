@@ -46,3 +46,6 @@ enczoo is a stateless **library** with a single, simple goal: to compute interme
 
 ## Configuration Tips
 - Use `uv run ...` for tool invocations to ensure the project environment is consistent (e.g., `uv run pytest tests`).
+
+## Documentation Maintenance
+- Keep the `README.md` "Available models" section up to date whenever public model classes are added, removed, renamed, or materially changed.

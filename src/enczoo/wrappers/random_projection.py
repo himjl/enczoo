@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from enczoo.base import ImageEncoding
+from enczoo.base import DeviceType, ImageEncoding, TorchImageEncoding
 
 
 class RandomProjectionLayer(nn.Module):
@@ -19,18 +19,10 @@ class RandomProjectionLayer(nn.Module):
         out_features: int,
         seed: int,
     ):
-        """Initialize the random projection.
-
-        Args:
-            in_features: Input feature dimension.
-            out_features: Output feature dimension.
-            seed: Seed for the random projection weights.
-        """
-
+        """Initialize the random projection."""
         super().__init__()
         self.train(mode=False)
 
-        # Register inputs as buffers; these will constitute the module's hash.
         self.register_buffer(
             "seed", torch.tensor(seed, dtype=torch.int64, requires_grad=False)
         )
@@ -44,7 +36,6 @@ class RandomProjectionLayer(nn.Module):
         )
 
         with torch.random.fork_rng():
-            # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
             weights = torch.randn(
                 size=(out_features, in_features),
@@ -55,14 +46,7 @@ class RandomProjectionLayer(nn.Module):
         self.register_buffer("projection_weights", weights)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Project input features with a fixed random matrix.
-
-        Args:
-            x: Input tensor of shape [B, in_features].
-
-        Returns:
-            Projected tensor of shape [B, out_features].
-        """
+        """Project input features with a fixed random matrix."""
         weights = cast(torch.Tensor, self.projection_weights)
         return F.linear(x, weights)
 
@@ -71,7 +55,7 @@ class RandomProjectionLayer(nn.Module):
         return f"RandomProjectionLayer(in_features={self.in_features}, out_features={self.out_features}, seed={self.seed})"
 
 
-class RandomProjection(ImageEncoding):
+class RandomProjection(TorchImageEncoding):
     """Wrap an image encoder with a fixed random projection."""
 
     def __init__(
@@ -79,15 +63,11 @@ class RandomProjection(ImageEncoding):
         encoder: ImageEncoding,
         out_features: int,
         seed: int,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
     ):
-        """Initialize the projection wrapper.
-
-        Args:
-            encoder: Base encoder whose flattened features will be projected.
-            out_features: Output feature dimension after projection.
-            seed: Seed for the projection weights.
-        """
-        super().__init__()
+        """Initialize the projection wrapper."""
+        super().__init__(device=device, device_index=device_index)
         self.encoder = encoder
         self.out_features = out_features
         self.seed = seed
@@ -98,25 +78,24 @@ class RandomProjection(ImageEncoding):
             out_features=out_features,
             seed=seed,
         )
+        self.layer = self.layer.to(self.torch_device)
 
     @property
     def output_shape(self) -> tuple[int, ...]:
         """Return the projected feature shape."""
         return (self.out_features,)
 
-    def compute_features(
+    def _images_to_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
-        seed: int | None = None,
-    ) -> np.ndarray:
+    ) -> torch.Tensor:
         """Project the wrapped encoder's flattened features."""
-        del flatten
-        features = self.encoder.compute_features(images=images, flatten=True, seed=seed)
-        if features.ndim != 2:
-            raise ValueError(
-                f"Expected wrapped encoder to return flattened features with shape [B, d], but got {features.shape}"
-            )
+        features = self.encoder.compute_features(images=images)
+        features = features.reshape(features.shape[0], -1)
 
-        projected = self.layer(torch.from_numpy(features).to(dtype=torch.float32))
-        return projected.detach().cpu().numpy()
+        return self.layer(
+            torch.from_numpy(features).to(
+                device=self.torch_device,
+                dtype=torch.float32,
+            )
+        )

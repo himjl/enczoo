@@ -12,10 +12,9 @@ from typing import Any
 
 import PIL.Image
 import numpy as np
-
 from tqdm import tqdm
 
-from enczoo.base import ImageEncoding
+from enczoo.base import DeviceType, TensorflowImageEncoding
 
 _CACHE_ENV_VAR = "ENCZOO_CACHE_DIR"
 _DOWNLOAD_CHUNK_SIZE = 1024 * 1024
@@ -38,20 +37,26 @@ def _default_cache_dir() -> Path:
     return Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "enczoo"
 
 
-class _AlignNet(ImageEncoding, ABC):
+class _AlignNet(TensorflowImageEncoding, ABC):
     """TensorFlow SavedModel-backed AlignNet encoder."""
 
     model_name: str
     weights_url: str
     output_key: str | None = "pre_logits"
 
-    def __init__(self, cache_dir: str | Path | None = None):
+    def __init__(
+        self,
+        cache_dir: str | Path | None = None,
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
         import tensorflow as tf
 
-        super().__init__()
+        super().__init__(device=device, device_index=device_index)
         self.model_dir = self._ensure_model_dir(cache_dir=cache_dir)
-        self.model = tf.saved_model.load(export_dir=str(self.model_dir))
-        self.forward = self.model.signatures["serving_default"]
+        with tf.device(self.tensorflow_device_name):
+            self.model = tf.saved_model.load(export_dir=str(self.model_dir))
+            self._forward = self.model.signatures["serving_default"]
 
     @classmethod
     def _resolve_model_dir(cls, cache_dir: str | Path | None) -> Path:
@@ -150,20 +155,15 @@ class _AlignNet(ImageEncoding, ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
-        seed: int | None = None,
     ) -> np.ndarray:
         """Compute AlignNet features as a NumPy array."""
-        del seed
         self.validate_images(images)
         import tensorflow as tf
 
         batch = np.stack([self._preprocess_image(image) for image in images], axis=0)
-        outputs = self.forward(images=tf.convert_to_tensor(batch))
-        features = self._select_features(outputs=outputs)
-        if flatten:
-            features = features.reshape(features.shape[0], -1)
-        return features
+        with tf.device(self.tensorflow_device_name):
+            outputs = self._forward(images=tf.convert_to_tensor(batch))
+        return self._select_features(outputs=outputs)
 
     def _select_features(self, outputs: Any) -> np.ndarray:
         """Select the feature tensor from the SavedModel outputs."""
@@ -188,12 +188,7 @@ class _AlignNet(ImageEncoding, ABC):
 
     @staticmethod
     def _preprocess_image(image: PIL.Image.Image) -> np.ndarray:
-        """Convert a PIL image to a float32 BHWC-ready tensor.
-
-        enczoo preserves the largest centered square crop by resizing the
-        shorter side to 224 and then center-cropping to 224x224 before scaling
-        values to [0, 1].
-        """
+        """Convert a PIL image to a float32 BHWC-ready tensor."""
         image = image.convert("RGB")
         width, height = image.size
         scale = _MODEL_INPUT_SIZE / min(width, height)
@@ -216,13 +211,12 @@ class _AlignNet(ImageEncoding, ABC):
 
 
 class AligNetViTB16(_AlignNet):
-    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from AlignNet (a teacher network tuned against human triplet judgments).
-
-    Reference:
+    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from AlignNet (which was tuned on human triplet judgments).
+     Reference:
         Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
         human visual representations across abstraction levels." Nature 647,
         349-355 (2025). https://doi.org/10.1038/s41586-025-09631-6
-    """
+     """
 
     model_name = "ViT-B-alignet"
     weights_url = "https://storage.googleapis.com/alignet/models/ViT-B-alignet.tar.gz"

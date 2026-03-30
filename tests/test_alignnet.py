@@ -1,12 +1,14 @@
 import io
 import tarfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import PIL.Image
 import numpy as np
+import pytest
 import tensorflow as tf
 
-from enczoo.alignnet.alignnet import AligNetViTB16, UnaligNetViTB16
+from enczoo.encoders.alignnet import AligNetViTB16, UnaligNetViTB16
 
 
 class _BytesResponse(io.BytesIO):
@@ -105,3 +107,47 @@ def test_alignnet_preprocessing_uses_resize_then_center_crop():
     assert processed.dtype == np.float32
     assert np.allclose(processed[0, 0], np.array([0.0, 1.0, 0.0], dtype=np.float32))
     assert np.allclose(processed[0, -1], np.array([0.0, 1.0, 0.0], dtype=np.float32))
+
+
+def test_alignnet_uses_requested_tensorflow_gpu_index(monkeypatch, tmp_path):
+    _install_fake_saved_model(
+        monkeypatch,
+        {
+            AligNetViTB16.weights_url: _build_model_archive(AligNetViTB16.model_name),
+        },
+    )
+    monkeypatch.setattr(
+        tf.config,
+        "list_logical_devices",
+        lambda device_type: (
+            [SimpleNamespace(name="/GPU:0"), SimpleNamespace(name="/GPU:1")]
+            if device_type == "GPU"
+            else [SimpleNamespace(name="/CPU:0")]
+        ),
+    )
+
+    encoder = AligNetViTB16(cache_dir=tmp_path, device="gpu", device_index=1)
+
+    assert encoder.compute_features(
+        images=[PIL.Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))]
+    ).shape == (1, 768)
+    assert encoder.tensorflow_device_name == "/GPU:1"
+
+
+def test_alignnet_raises_when_requested_gpu_is_unavailable(monkeypatch, tmp_path):
+    _install_fake_saved_model(
+        monkeypatch,
+        {
+            AligNetViTB16.weights_url: _build_model_archive(AligNetViTB16.model_name),
+        },
+    )
+    monkeypatch.setattr(
+        tf.config,
+        "list_logical_devices",
+        lambda device_type: [SimpleNamespace(name="/CPU:0")]
+        if device_type == "CPU"
+        else [],
+    )
+
+    with pytest.raises(ValueError, match="TensorFlow could not find an available GPU"):
+        AligNetViTB16(cache_dir=tmp_path, device="gpu")

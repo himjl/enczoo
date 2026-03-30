@@ -2,10 +2,11 @@ import PIL.Image
 import numpy as np
 import pytest
 import torch
-from typing import cast
+from typing import Any, cast
 
-from enczoo.base import ImageEncoding
-import enczoo.random_projection as random_projection_layer
+from enczoo.base import ImageEncoding, TorchImageEncoding
+from enczoo.encoders.pixels import Pixels
+import enczoo.wrappers.random_projection as random_projection_layer
 
 
 @pytest.fixture
@@ -128,17 +129,51 @@ class _ToyEncoding(ImageEncoding):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
-        seed: int | None = None,
     ) -> np.ndarray:
-        del seed
         self.validate_images(images)
-        features = np.arange(len(images) * 6, dtype=np.float32).reshape(
-            len(images), 2, 3
-        )
-        if flatten:
-            return features.reshape(len(images), -1)
-        return features
+        return np.arange(len(images) * 6, dtype=np.float32).reshape(len(images), 2, 3)
+
+
+class _ToyTorchEncoding(TorchImageEncoding):
+    def _images_to_features(
+        self,
+        images: list[PIL.Image.Image],
+    ) -> torch.Tensor:
+        del images
+        return torch.zeros((1, 1), device=self.torch_device)
+
+
+def test_device_index_requires_gpu():
+    with pytest.raises(ValueError, match="device_index can only be set"):
+        _ToyEncoding(device_index=0)
+
+
+def test_unknown_device_raises():
+    with pytest.raises(ValueError, match="Unknown device"):
+        _ToyEncoding(device=cast(Any, "tpu"))
+
+
+def test_resolve_requested_cuda_device(monkeypatch):
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(torch.cuda, "device_count", lambda: 2)
+
+    encoder = _ToyTorchEncoding(device="gpu", device_index=1)
+
+    assert encoder.torch_device == torch.device("cuda:1")
+
+
+def test_pixels_preprocesses_to_224_hwc_float32():
+    image = PIL.Image.fromarray(np.zeros((300, 500, 3), dtype=np.uint8))
+
+    features = Pixels().compute_features(images=[image])
+
+    assert features.shape == (1, 224, 224, 3)
+    assert features.dtype == np.float32
+
+
+def test_pixels_rejects_gpu():
+    with pytest.raises(ValueError, match="Pixels only supports device='cpu'"):
+        Pixels(device="gpu")
 
 
 def test_projection_wrapper_matches_projection_layer():
@@ -150,12 +185,12 @@ def test_projection_wrapper_matches_projection_layer():
         seed=7,
     )
 
-    result = projected.compute_features(images=[image, image], flatten=False)
+    result = projected.compute_features(images=[image, image])
     expected = random_projection_layer.RandomProjectionLayer(
         in_features=6,
         out_features=4,
         seed=7,
-    )(torch.from_numpy(encoder.compute_features(images=[image, image], flatten=True)))
+    )(torch.from_numpy(encoder.compute_features(images=[image, image]).reshape(2, -1)))
 
     assert result.shape == (2, 4)
     assert np.allclose(result, expected.detach().cpu().numpy())

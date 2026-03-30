@@ -2,7 +2,7 @@ import PIL.Image
 import numpy as np
 import torch
 
-from enczoo.transformers.vit import CLIPViTB16, DINOv2ViTB14
+from enczoo.encoders.vit import CLIPViTB16, DINOv2ViTB14
 
 
 class _FakeImageProcessor:
@@ -47,7 +47,7 @@ def test_clip_vit_b16_returns_pooled_features(monkeypatch):
     encoder = CLIPViTB16()
     image = PIL.Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))
 
-    features = encoder(images=[image, image])
+    features = encoder.forward(images=[image, image])
 
     assert features.shape == (2, 768)
     assert torch.all(features == 1)
@@ -66,7 +66,7 @@ def test_dinov2_vit_b14_returns_pooled_features(monkeypatch):
     encoder = DINOv2ViTB14()
     image = PIL.Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))
 
-    features = encoder(images=[image, image])
+    features = encoder.forward(images=[image, image])
 
     assert features.shape == (2, 768)
     assert torch.all(features == 2)

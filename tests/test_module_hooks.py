@@ -2,7 +2,7 @@ import PIL.Image
 import numpy as np
 import torch
 
-from enczoo.neural_networks.base import ImageNeuralNetwork
+from enczoo.encoders.base import ImageNeuralNetwork
 
 
 class _ImageToTensor(torch.nn.Module):
@@ -42,5 +42,5 @@ def test_supports_non_leaf_module_hooks():
     assert encoder.layer_name_to_shape["head"] == (2,)
 
     image = PIL.Image.fromarray(np.zeros((8, 8, 3), dtype=np.uint8))
-    features = encoder.compute_features(images=[image], flatten=False)
+    features = encoder.compute_features(images=[image])
     assert features.shape == (1, 2)
