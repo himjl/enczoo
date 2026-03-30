@@ -129,9 +129,7 @@ class _ToyEncoding(ImageEncoding):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> np.ndarray:
-        del seed
         self.validate_images(images)
         return np.arange(len(images) * 6, dtype=np.float32).reshape(len(images), 2, 3)
 
@@ -140,9 +138,8 @@ class _ToyTorchEncoding(TorchImageEncoding):
     def _images_to_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> torch.Tensor:
-        del images, seed
+        del images
         return torch.zeros((1, 1), device=self.torch_device)
 
 
