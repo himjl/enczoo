@@ -22,10 +22,8 @@ class Pixels(ImageEncoding):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> np.ndarray:
         """Return float32 pixels with shape [B, 224, 224, 3]."""
-        del seed
         self.validate_images(images)
         return np.stack(
             [self._preprocess_image(image) for image in images],

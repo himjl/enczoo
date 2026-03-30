@@ -51,10 +51,8 @@ class _HuggingFaceViT(TorchImageEncoding, ABC):
     def _images_to_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> torch.Tensor:
         """Convert images to pooled transformer features."""
-        del seed
         inputs = self.image_processor(images=images, return_tensors="pt")
         pixel_values = inputs["pixel_values"].to(self.torch_device)
 

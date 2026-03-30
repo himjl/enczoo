@@ -106,11 +106,8 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
     def _images_to_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> torch.Tensor:
         """Convert images to network activations."""
-        del seed
-
         preprocessed_images = torch.stack(
             [self.image_loader(image) for image in images],
             dim=0,

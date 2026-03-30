@@ -6,6 +6,7 @@ import numpy as np
 import torch
 
 DeviceType = Literal["cpu", "gpu"]
+_TORCH_EXECUTION_SEED = 0
 
 
 class ImageEncoding(ABC):
@@ -85,13 +86,11 @@ class ImageEncoding(ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> np.ndarray:
         """Compute features and return them as a NumPy array.
 
         Args:
             images: A B-length list of PIL.Image.Image.
-            seed: Optional RNG seed for deterministic results.
 
         Returns:
             A NumPy array of shape [B, *].
@@ -155,34 +154,30 @@ class TorchImageEncoding(ImageEncoding, ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> np.ndarray:
         """Compute torch features and return them as a NumPy array."""
         self.validate_images(images)
 
         with torch.random.fork_rng():
-            if seed is not None:
-                torch.manual_seed(seed)
-                if torch.cuda.is_available():
-                    torch.cuda.manual_seed_all(seed)
+            torch.manual_seed(_TORCH_EXECUTION_SEED)
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(_TORCH_EXECUTION_SEED)
             with torch.no_grad():
-                torch_features = self.forward(images=images, seed=seed)
+                torch_features = self.forward(images=images)
                 return torch_features.detach().cpu().numpy()
 
     def forward(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> torch.Tensor:
         """Compute torch features for a batch of images."""
         self.validate_images(images)
-        return self._images_to_features(images=images, seed=seed)
+        return self._images_to_features(images=images)
 
     @abstractmethod
     def _images_to_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> torch.Tensor:
         """Convert images to torch features."""
         raise NotImplementedError

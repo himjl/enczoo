@@ -155,10 +155,8 @@ class _AlignNet(TensorflowImageEncoding, ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> np.ndarray:
         """Compute AlignNet features as a NumPy array."""
-        del seed
         self.validate_images(images)
         import tensorflow as tf
 

@@ -88,10 +88,9 @@ class RandomProjection(TorchImageEncoding):
     def _images_to_features(
         self,
         images: list[PIL.Image.Image],
-        seed: int | None = None,
     ) -> torch.Tensor:
         """Project the wrapped encoder's flattened features."""
-        features = self.encoder.compute_features(images=images, seed=seed)
+        features = self.encoder.compute_features(images=images)
         features = features.reshape(features.shape[0], -1)
 
         return self.layer(
