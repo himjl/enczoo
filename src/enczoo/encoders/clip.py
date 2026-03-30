@@ -1,5 +1,5 @@
 from enczoo.base import DeviceType
-from enczoo.encoders.torchvision import _PretrainedNN
+from enczoo.encoders.torchvision_models import _PretrainedNN
 
 
 class CLIPResNet50(_PretrainedNN):
@@ -43,5 +43,5 @@ class CLIPResNet50(_PretrainedNN):
         """Load the CLIP RN50 image loader and visual model."""
         import clip
 
-        model, image_loader = clip.load("RN50", device="cpu")
+        model, image_loader = clip.load(name="RN50", device="cpu")
         return image_loader, model.visual
