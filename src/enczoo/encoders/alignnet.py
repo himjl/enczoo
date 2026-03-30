@@ -155,7 +155,6 @@ class _AlignNet(TensorflowImageEncoding, ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
         """Compute AlignNet features as a NumPy array."""
@@ -166,10 +165,7 @@ class _AlignNet(TensorflowImageEncoding, ABC):
         batch = np.stack([self._preprocess_image(image) for image in images], axis=0)
         with tf.device(self.tensorflow_device_name):
             outputs = self._forward(images=tf.convert_to_tensor(batch))
-        features = self._select_features(outputs=outputs)
-        if flatten:
-            features = features.reshape(features.shape[0], -1)
-        return features
+        return self._select_features(outputs=outputs)
 
     def _select_features(self, outputs: Any) -> np.ndarray:
         """Select the feature tensor from the SavedModel outputs."""

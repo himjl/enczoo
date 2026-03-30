@@ -43,7 +43,7 @@ class ImageEncoding(ABC):
         """Return the output feature shape (excluding batch dimension)."""
         if self._output_shape is None:
             test_image = PIL.Image.fromarray(np.zeros((512, 512, 3), dtype=np.uint8))
-            test_result = self.compute_features(images=[test_image], flatten=False)
+            test_result = self.compute_features(images=[test_image])
             if not isinstance(test_result, np.ndarray):
                 raise ValueError(
                     f"Expected a np.ndarray from compute_features, but got {type(test_result)}"
@@ -85,18 +85,16 @@ class ImageEncoding(ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
         """Compute features and return them as a NumPy array.
 
         Args:
             images: A B-length list of PIL.Image.Image.
-            flatten: If True, flatten the output to [B, d].
             seed: Optional RNG seed for deterministic results.
 
         Returns:
-            A NumPy array of shape [B, *], or [B, d] if flatten=True.
+            A NumPy array of shape [B, *].
 
         Raises:
             ValueError: If the input images are invalid.
@@ -157,7 +155,6 @@ class TorchImageEncoding(ImageEncoding, ABC):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
         """Compute torch features and return them as a NumPy array."""
@@ -169,21 +166,17 @@ class TorchImageEncoding(ImageEncoding, ABC):
                 if torch.cuda.is_available():
                     torch.cuda.manual_seed_all(seed)
             with torch.no_grad():
-                torch_features = self.forward(images=images, flatten=flatten, seed=seed)
+                torch_features = self.forward(images=images, seed=seed)
                 return torch_features.detach().cpu().numpy()
 
     def forward(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
         seed: int | None = None,
     ) -> torch.Tensor:
         """Compute torch features for a batch of images."""
         self.validate_images(images)
-        features = self._images_to_features(images=images, seed=seed)
-        if flatten:
-            features = features.reshape(features.shape[0], -1)
-        return features
+        return self._images_to_features(images=images, seed=seed)
 
     @abstractmethod
     def _images_to_features(

@@ -91,11 +91,8 @@ class RandomProjection(TorchImageEncoding):
         seed: int | None = None,
     ) -> torch.Tensor:
         """Project the wrapped encoder's flattened features."""
-        features = self.encoder.compute_features(images=images, flatten=True, seed=seed)
-        if features.ndim != 2:
-            raise ValueError(
-                f"Expected wrapped encoder to return flattened features with shape [B, d], but got {features.shape}"
-            )
+        features = self.encoder.compute_features(images=images, seed=seed)
+        features = features.reshape(features.shape[0], -1)
 
         return self.layer(
             torch.from_numpy(features).to(

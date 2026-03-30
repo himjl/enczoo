@@ -129,17 +129,11 @@ class _ToyEncoding(ImageEncoding):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
         del seed
         self.validate_images(images)
-        features = np.arange(len(images) * 6, dtype=np.float32).reshape(
-            len(images), 2, 3
-        )
-        if flatten:
-            return features.reshape(len(images), -1)
-        return features
+        return np.arange(len(images) * 6, dtype=np.float32).reshape(len(images), 2, 3)
 
 
 class _ToyTorchEncoding(TorchImageEncoding):
@@ -174,7 +168,7 @@ def test_resolve_requested_cuda_device(monkeypatch):
 def test_pixels_preprocesses_to_224_hwc_float32():
     image = PIL.Image.fromarray(np.zeros((300, 500, 3), dtype=np.uint8))
 
-    features = Pixels().compute_features(images=[image], flatten=False)
+    features = Pixels().compute_features(images=[image])
 
     assert features.shape == (1, 224, 224, 3)
     assert features.dtype == np.float32
@@ -194,12 +188,12 @@ def test_projection_wrapper_matches_projection_layer():
         seed=7,
     )
 
-    result = projected.compute_features(images=[image, image], flatten=False)
+    result = projected.compute_features(images=[image, image])
     expected = random_projection_layer.RandomProjectionLayer(
         in_features=6,
         out_features=4,
         seed=7,
-    )(torch.from_numpy(encoder.compute_features(images=[image, image], flatten=True)))
+    )(torch.from_numpy(encoder.compute_features(images=[image, image]).reshape(2, -1)))
 
     assert result.shape == (2, 4)
     assert np.allclose(result, expected.detach().cpu().numpy())

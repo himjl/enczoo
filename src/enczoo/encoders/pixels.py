@@ -22,19 +22,15 @@ class Pixels(ImageEncoding):
     def compute_features(
         self,
         images: list[PIL.Image.Image],
-        flatten: bool = False,
         seed: int | None = None,
     ) -> np.ndarray:
-        """Return float32 pixels with shape [B, 224, 224, 3] or [B, d]."""
+        """Return float32 pixels with shape [B, 224, 224, 3]."""
         del seed
         self.validate_images(images)
-        features = np.stack(
+        return np.stack(
             [self._preprocess_image(image) for image in images],
             axis=0,
         )
-        if flatten:
-            return features.reshape(features.shape[0], -1)
-        return features
 
     @staticmethod
     def _preprocess_image(image: PIL.Image.Image) -> np.ndarray:
