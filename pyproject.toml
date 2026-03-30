@@ -9,7 +9,7 @@ authors = [
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
 dependencies = [
-    "clip",
+    "ftfy>=6.3.1",
     "pillow>=12.1.0",
     "tensorflow>=2.21.0; sys_platform == 'darwin'",
     "tensorflow[and-cuda]>=2.21.0; sys_platform == 'linux' or sys_platform == 'win32'",
@@ -31,6 +31,3 @@ dev = [
     "ruff>=0.14.10",
     "ty>=0.0.9",
 ]
-
-[tool.uv.sources]
-clip = { git = "https://github.com/openai/CLIP.git", rev = "ded190a052fdf4585bd685cee5bc96e0310d2c93" }

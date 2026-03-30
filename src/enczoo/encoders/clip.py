@@ -41,7 +41,7 @@ class CLIPResNet50(_PretrainedNN):
 
     def _load_modules(self):
         """Load the CLIP RN50 image loader and visual model."""
-        import clip
+        import enczoo._vendor.clip as clip
 
         model, image_loader = clip.load(name="RN50", device="cpu")
         return image_loader, model.visual
