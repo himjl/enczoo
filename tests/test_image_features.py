@@ -66,6 +66,10 @@ def test_images() -> list[PIL.Image.Image]:
                 seed=1,
             ),
         ),
+        (
+            "target_clip_rn50_attnpool.npy",
+            lambda: enczoo.CLIPResNet50(layer_name="attnpool"),
+        ),
     ],
 )
 def test_feature_regression(
