@@ -18,7 +18,10 @@ import enczoo
 from PIL import Image
 
 image = Image.open('my-image.png')
-model = enczoo.ResNet50(layer_name='avgpool') 
+model = enczoo.ResNet50(
+    layer_name='avgpool', 
+    # device=gpu
+) 
 features = model.compute_features(images=[image]) # np.ndarray
 # Want another layer? Check out: print(enczoo.ResNet50.layer_names)
 ```

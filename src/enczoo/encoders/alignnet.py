@@ -14,7 +14,7 @@ import PIL.Image
 import numpy as np
 from tqdm import tqdm
 
-from enczoo.base import DeviceType, TensorFlowImageEncoding
+from enczoo.base import DeviceType, TensorflowImageEncoding
 
 _CACHE_ENV_VAR = "ENCZOO_CACHE_DIR"
 _DOWNLOAD_CHUNK_SIZE = 1024 * 1024
@@ -37,7 +37,7 @@ def _default_cache_dir() -> Path:
     return Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "enczoo"
 
 
-class _AlignNet(TensorFlowImageEncoding, ABC):
+class _AlignNet(TensorflowImageEncoding, ABC):
     """TensorFlow SavedModel-backed AlignNet encoder."""
 
     model_name: str

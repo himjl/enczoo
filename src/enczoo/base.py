@@ -222,7 +222,7 @@ class TorchImageEncoding(ImageEncoding, ABC):
         )
 
 
-class TensorFlowImageEncoding(ImageEncoding, ABC):
+class TensorflowImageEncoding(ImageEncoding, ABC):
     """TensorFlow-backed image encoder with shared device resolution."""
 
     def __init__(
