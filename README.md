@@ -18,7 +18,7 @@ from PIL import Image
 
 image = Image.open('my-image.png')
 model = enczoo.ResNet50(
-    layer_name='avgpool', 
+    layer_name='avgpool',
     # device=gpu
 ) 
 features = model.compute_features(images=[image]) # np.ndarray
