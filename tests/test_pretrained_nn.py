@@ -8,7 +8,7 @@ import torch
 
 from enczoo import AlexNet
 from enczoo.encoders.clip import CLIPResNet50
-from enczoo.encoders.torchvision import ConvNeXtB, ResNet50
+from enczoo.encoders.torchvision_models import ConvNeXtB, ResNet50
 
 
 pytestmark = pytest.mark.skipif(
