@@ -1,4 +1,5 @@
 import os
+import inspect
 
 import PIL.Image
 import numpy as np
@@ -6,6 +7,8 @@ import pytest
 import torch
 
 from enczoo import AlexNet
+from enczoo.encoders.clip import CLIPResNet50
+from enczoo.encoders.torchvision import ConvNeXtB, ResNet50
 
 
 pytestmark = pytest.mark.skipif(
@@ -43,6 +46,15 @@ def image_batch2(images):
 
 def test_default_is_not_training(alexnet):
     assert not alexnet.training
+
+
+def test_torchvision_default_layer_names():
+    assert inspect.signature(AlexNet).parameters["layer_name"].default == "classifier.5"
+    assert inspect.signature(ResNet50).parameters["layer_name"].default == "avgpool"
+    assert inspect.signature(ConvNeXtB).parameters["layer_name"].default == "avgpool"
+    assert (
+        inspect.signature(CLIPResNet50).parameters["layer_name"].default == "attnpool"
+    )
 
 
 def test_alexnet_forward(alexnet, image_batch1, image_batch2):

@@ -131,6 +131,6 @@ Under the hood, `enczoo` solves several tiny problems which make correctly compu
 * ensures images are in RGB format 
 * puts the model in inference, not training, mode  
 * turns off autograd
-* returns tensors as `np.ndarray` (no more `.cpu().numpy()`)
+* returns tensors as `np.ndarray` (no more `detach().cpu().numpy()`)
 * resizes the image while preserving aspect ratio 
 * and more!

@@ -83,6 +83,19 @@ class AlexNet(_PretrainedNN):
         "classifier.6",
     ]
 
+    def __init__(
+        self,
+        layer_name: str = "classifier.5",
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
+        """Initialize an AlexNet encoder."""
+        super().__init__(
+            layer_name=layer_name,
+            device=device,
+            device_index=device_index,
+        )
+
     def _load_modules(self):
         """Load the AlexNet image loader and model."""
         image_loader = StandardImageLoader()
@@ -117,6 +130,19 @@ class ResNet50(_PretrainedNN):
         "fc",
     ]
 
+    def __init__(
+        self,
+        layer_name: str = "avgpool",
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
+        """Initialize a ResNet-50 encoder."""
+        super().__init__(
+            layer_name=layer_name,
+            device=device,
+            device_index=device_index,
+        )
+
     def _load_modules(self):
         """Load the ResNet-50 image loader and model."""
         image_loader = StandardImageLoader()
@@ -141,6 +167,19 @@ class ConvNeXtB(_PretrainedNN):
         "avgpool",
         "classifier",
     ]
+
+    def __init__(
+        self,
+        layer_name: str = "avgpool",
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
+        """Initialize a ConvNeXt-B encoder."""
+        super().__init__(
+            layer_name=layer_name,
+            device=device,
+            device_index=device_index,
+        )
 
     def _load_modules(self):
         """Load the ConvNeXt-B image loader and model."""

@@ -1,3 +1,4 @@
+from enczoo.base import DeviceType
 from enczoo.encoders.torchvision import _PretrainedNN
 
 
@@ -24,6 +25,19 @@ class CLIPResNet50(_PretrainedNN):
         "layer4.2.relu3",
         "attnpool",
     ]
+
+    def __init__(
+        self,
+        layer_name: str = "attnpool",
+        device: DeviceType = "cpu",
+        device_index: int | None = None,
+    ):
+        """Initialize a CLIP RN50 encoder."""
+        super().__init__(
+            layer_name=layer_name,
+            device=device,
+            device_index=device_index,
+        )
 
     def _load_modules(self):
         """Load the CLIP RN50 image loader and visual model."""
