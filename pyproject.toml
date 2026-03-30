@@ -1,6 +1,6 @@
 [project]
 name = "enczoo"
-version = "0.1.5"
+version = "0.1.5.dev3"
 description = "Easily map images (as `PIL.Images`) to features (as `np.ndarray`) from pretrained vision models."
 readme = "README.md"
 authors = [

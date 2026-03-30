@@ -3,6 +3,7 @@ __all__ = [
     "RandomProjection",
     "Pixels",
     "ResNet50",
+    "RobustResNet50",
     "AlexNet",
     "ConvNeXtB",
     "CLIPResNet50",
@@ -22,6 +23,7 @@ from enczoo.base import ImageEncoding
 from enczoo.encoders.alignnet import AligNetViTB16, UnaligNetViTB16
 from enczoo.encoders.clip import CLIPResNet50
 from enczoo.encoders.pixels import Pixels
+from enczoo.encoders.robust_rn50 import RobustResNet50
 from enczoo.encoders.torchvision_models import AlexNet, ConvNeXtB, ResNet50
 from enczoo.encoders.vit import CLIPViTB16, DINOv2ViTB14
 from enczoo.wrappers.random_projection import RandomProjection

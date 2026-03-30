@@ -60,6 +60,18 @@ features = model.compute_features(images=[image]) # np.ndarray
 </details>
 
 <details>
+<summary><code>RobustResNet50</code></summary>
+
+- Family: adversarially robust ImageNet ResNet-50
+- Returns: intermediate activations from the requested layer
+- Output shape: depends on `layer_name`
+- Layer selection: inspect `enczoo.RobustResNet50.layer_names`
+- Weights: downloaded on first use from the released ImageNet L2 epsilon-3.0 checkpoint
+- Academic reference: Engstrom et al., "Robustness (Python Library)" release checkpoint via the [MadryLab model weights](https://github.com/MadryLab/robustness)
+
+</details>
+
+<details>
 <summary><code>ConvNeXtB</code></summary>
 
 - Family: ImageNet-pretrained CNN
