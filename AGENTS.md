@@ -49,3 +49,6 @@ enczoo is a stateless **library** with a single, simple goal: to compute interme
 
 ## Documentation Maintenance
 - Keep the `README.md` "Available models" section up to date whenever public model classes are added, removed, renamed, or materially changed.
+
+## Vendored Code
+- Treat `src/enczoo/_vendor/` as vendored third-party code: preserve upstream provenance, keep license notices alongside the vendored files, and document any local modifications clearly.

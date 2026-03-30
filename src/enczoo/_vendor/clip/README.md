@@ -4,6 +4,7 @@ This directory contains vendored code from the OpenAI CLIP repository:
 
 - Source: https://github.com/openai/CLIP
 - Upstream license: MIT
+- Vendored code reflects commit with SHA-256: d05afc436d78f1c48dc0dbf8e5980a9d471f35f6
 
 This copy is included inside `enczoo` so `CLIPResNet50` works without requiring
 users to install a separate `clip` package.
