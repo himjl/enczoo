@@ -2,7 +2,7 @@ import PIL.Image
 import numpy as np
 import torch
 
-from enczoo.encoders.base import ImageNeuralNetwork
+from enczoo.encoders.torchvision_models import _ImageNeuralNetwork
 
 
 class _ImageToTensor(torch.nn.Module):
@@ -31,7 +31,7 @@ class _ToyModel(torch.nn.Module):
 
 def test_supports_non_leaf_module_hooks():
     torch.manual_seed(0)
-    encoder = ImageNeuralNetwork(
+    encoder = _ImageNeuralNetwork(
         image_loader=_ImageToTensor(),
         model=_ToyModel(),
         layer_name="head",
