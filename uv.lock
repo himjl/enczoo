@@ -181,19 +181,6 @@ wheels = [
 ]
 
 [[package]]
-name = "clip"
-version = "1.0"
-source = { git = "https://github.com/openai/CLIP.git?rev=ded190a052fdf4585bd685cee5bc96e0310d2c93#ded190a052fdf4585bd685cee5bc96e0310d2c93" }
-dependencies = [
-    { name = "ftfy" },
-    { name = "packaging" },
-    { name = "regex" },
-    { name = "torch" },
-    { name = "torchvision" },
-    { name = "tqdm" },
-]
-
-[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -348,10 +335,10 @@ wheels = [
 
 [[package]]
 name = "enczoo"
-version = "0.1.4"
+version = "0.1.5.dev2"
 source = { editable = "." }
 dependencies = [
-    { name = "clip" },
+    { name = "ftfy" },
     { name = "pillow" },
     { name = "tensorflow", marker = "sys_platform == 'darwin' or sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "tensorflow", extra = ["and-cuda"], marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
@@ -372,7 +359,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "clip", git = "https://github.com/openai/CLIP.git?rev=ded190a052fdf4585bd685cee5bc96e0310d2c93" },
+    { name = "ftfy", specifier = ">=6.3.1" },
     { name = "pillow", specifier = ">=12.1.0" },
     { name = "tensorflow", marker = "sys_platform == 'darwin'", specifier = ">=2.21.0" },
     { name = "tensorflow", extras = ["and-cuda"], marker = "sys_platform == 'linux' or sys_platform == 'win32'", specifier = ">=2.21.0" },

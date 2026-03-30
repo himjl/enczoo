@@ -1,7 +1,7 @@
 [project]
 name = "enczoo"
-version = "0.1.4"
-description = "Map images (as `PIL.Images`) to intermediate representations (as `np.ndarray`) from off-the-shelf vision models."
+version = "0.1.5.dev2"
+description = "Easily map images (as `PIL.Images`) to features (as `np.ndarray`) from pretrained vision models."
 readme = "README.md"
 authors = [
     { name = "Michael J. Lee", email = "mil@mit.edu" }
@@ -9,7 +9,7 @@ authors = [
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
 dependencies = [
-    "clip",
+    "ftfy>=6.3.1",
     "pillow>=12.1.0",
     "tensorflow>=2.21.0; sys_platform == 'darwin'",
     "tensorflow[and-cuda]>=2.21.0; sys_platform == 'linux' or sys_platform == 'win32'",
@@ -32,5 +32,8 @@ dev = [
     "ty>=0.0.9",
 ]
 
-[tool.uv.sources]
-clip = { git = "https://github.com/openai/CLIP.git", rev = "ded190a052fdf4585bd685cee5bc96e0310d2c93" }
+[tool.ty.src]
+exclude = ["src/enczoo/_vendor/"]
+
+[tool.ruff]
+exclude = ["src/enczoo/_vendor"]
