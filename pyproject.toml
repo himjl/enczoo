@@ -1,6 +1,6 @@
 [project]
 name = "enczoo"
-version = "0.1.3"
+version = "0.1.4"
 description = "Map images (as `PIL.Images`) to intermediate representations (as `np.ndarray`) from off-the-shelf vision models."
 readme = "README.md"
 authors = [
