@@ -2,7 +2,7 @@ import PIL.Image
 import numpy as np
 import torch
 
-from enczoo.neural_networks.base import ImageNeuralNetwork
+from enczoo.encoders.base import ImageNeuralNetwork
 
 
 class _ImageToTensor(torch.nn.Module):

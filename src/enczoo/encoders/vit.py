@@ -4,8 +4,7 @@ import PIL.Image
 import torch
 import transformers
 
-from enczoo.base import DeviceType
-from enczoo.torch_base import TorchImageEncoding
+from enczoo.base import DeviceType, TorchImageEncoding
 
 
 class _HuggingFaceViT(TorchImageEncoding, ABC):
@@ -23,11 +22,8 @@ class _HuggingFaceViT(TorchImageEncoding, ABC):
     ):
         """Initialize the image processor and model."""
         super().__init__(device=device, device_index=device_index)
-
         if self.suppress_transformers_load_logging:
-            # CLIP checkpoints on HF include text-side weights we intentionally ignore.
             transformers.logging.set_verbosity_error()
-
         self.image_processor = transformers.AutoImageProcessor.from_pretrained(
             self.model_id,
             use_fast=self.use_fast_processor,

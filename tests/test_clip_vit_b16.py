@@ -2,7 +2,7 @@ import PIL.Image
 import numpy as np
 import torch
 
-from enczoo.transformers.vit import CLIPViTB16, DINOv2ViTB14
+from enczoo.encoders.vit import CLIPViTB16, DINOv2ViTB14
 
 
 class _FakeImageProcessor:

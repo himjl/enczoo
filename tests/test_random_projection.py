@@ -5,8 +5,8 @@ import torch
 from typing import Any, cast
 
 from enczoo.base import ImageEncoding
-from enczoo.classic.pixels import Pixels
-import enczoo.random_projection as random_projection_layer
+from enczoo.encoders.pixels import Pixels
+import enczoo.wrappers.random_projection as random_projection_layer
 
 
 @pytest.fixture

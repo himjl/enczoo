@@ -7,8 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from enczoo.base import DeviceType, ImageEncoding
-from enczoo.torch_base import TorchImageEncoding
+from enczoo.base import DeviceType, ImageEncoding, TorchImageEncoding
 
 
 class RandomProjectionLayer(nn.Module):
@@ -20,18 +19,10 @@ class RandomProjectionLayer(nn.Module):
         out_features: int,
         seed: int,
     ):
-        """Initialize the random projection.
-
-        Args:
-            in_features: Input feature dimension.
-            out_features: Output feature dimension.
-            seed: Seed for the random projection weights.
-        """
-
+        """Initialize the random projection."""
         super().__init__()
         self.train(mode=False)
 
-        # Register inputs as buffers; these will constitute the module's hash.
         self.register_buffer(
             "seed", torch.tensor(seed, dtype=torch.int64, requires_grad=False)
         )
@@ -45,7 +36,6 @@ class RandomProjectionLayer(nn.Module):
         )
 
         with torch.random.fork_rng():
-            # Set the weights from a standard normal distribution:
             torch.manual_seed(seed)
             weights = torch.randn(
                 size=(out_features, in_features),
@@ -56,14 +46,7 @@ class RandomProjectionLayer(nn.Module):
         self.register_buffer("projection_weights", weights)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Project input features with a fixed random matrix.
-
-        Args:
-            x: Input tensor of shape [B, in_features].
-
-        Returns:
-            Projected tensor of shape [B, out_features].
-        """
+        """Project input features with a fixed random matrix."""
         weights = cast(torch.Tensor, self.projection_weights)
         return F.linear(x, weights)
 
@@ -83,15 +66,7 @@ class RandomProjection(TorchImageEncoding):
         device: DeviceType = "cpu",
         device_index: int | None = None,
     ):
-        """Initialize the projection wrapper.
-
-        Args:
-            encoder: Base encoder whose flattened features will be projected.
-            out_features: Output feature dimension after projection.
-            seed: Seed for the projection weights.
-            device: Whether computations should run on the CPU or a GPU.
-            device_index: Optional zero-based GPU index used when device="gpu".
-        """
+        """Initialize the projection wrapper."""
         super().__init__(device=device, device_index=device_index)
         self.encoder = encoder
         self.out_features = out_features

@@ -6,37 +6,21 @@ import torchvision.models
 import torchvision.transforms.functional as F
 
 from enczoo.base import DeviceType
-from enczoo.neural_networks.base import ImageNeuralNetwork
+from enczoo.encoders.base import ImageNeuralNetwork
 
 
 class StandardImageLoader(torch.nn.Module):
-    """Load and normalize images for standard torchvision models.
-
-    This loader resizes the smaller dimension of the image to 224 before performing a 224 center-crop.
-    This can be contrasted with the standard torchvision loader, which resizes the smaller dimension to some size >224 (e.g. 256 for AlexNet; 232 for ConvNeXt) before performing a 224 center-crop, which
-        effectively removes more of the image's content.
-
-    This preserves the largest square sub-image. It also converts inputs to RGB.
-
-    Example:
-        - Original loader: resize to 256, then center-crop 224.
-        - This loader: resize to 224, then center-crop 224.
-    """
+    """Load and normalize images for standard torchvision models."""
 
     def forward(self, img: PIL.Image.Image) -> torch.Tensor:
-        """Convert a PIL image into a normalized tensor.
-
-        Args:
-            img: Input image.
-
-        Returns:
-            Normalized image tensor suitable for torchvision models.
-        """
+        """Convert a PIL image into a normalized tensor."""
         img = img.convert("RGB")
 
         img_tensor = F.pil_to_tensor(pic=img)
         img_tensor = F.resize(
-            img=img_tensor, size=[224], interpolation=F.InterpolationMode.BILINEAR
+            img=img_tensor,
+            size=[224],
+            interpolation=F.InterpolationMode.BILINEAR,
         )
         img_tensor = F.center_crop(img=img_tensor, output_size=[224])
         img_tensor = F.convert_image_dtype(image=img_tensor, dtype=torch.float)
@@ -59,16 +43,7 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
         device: DeviceType = "cpu",
         device_index: int | None = None,
     ):
-        """Initialize a pretrained encoder.
-
-        Args:
-            layer_name: Name of the layer whose activations are returned.
-            device: Whether computations should run on the CPU or a GPU.
-            device_index: Optional zero-based GPU index used when device="gpu".
-
-        Raises:
-            ValueError: If the layer name is invalid.
-        """
+        """Initialize a pretrained encoder."""
         if layer_name not in self.layer_names:
             raise ValueError(
                 f"Unknown layer_name: {layer_name}. Available:\n{self.layer_names}"
@@ -76,7 +51,6 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
         image_loader, model = self._load_modules()
 
-        # Ensure modules are in evaluation mode by default
         if isinstance(image_loader, torch.nn.Module):
             image_loader.train(mode=False)
         model.train(mode=False)
@@ -91,19 +65,13 @@ class _PretrainedNN(ImageNeuralNetwork, ABC):
 
     @abstractmethod
     def _load_modules(self) -> tuple[torch.nn.Module, torch.nn.Module]:
-        """Load the image loader and model for this network.
-
-        Returns:
-            A tuple of (image_loader, model).
-        """
+        """Load the image loader and model for this network."""
         raise NotImplementedError
 
 
-# %%
 class AlexNet(_PretrainedNN):
     """AlexNet encoder with named layer outputs."""
 
-    # A subset of all layers (each separated by one nonlinearity):
     layer_names = [
         "features.1",
         "features.4",
@@ -124,11 +92,9 @@ class AlexNet(_PretrainedNN):
         return image_loader, model
 
 
-# %%
 class ResNet50(_PretrainedNN):
     """ResNet-50 encoder with named layer outputs."""
 
-    # A subset of layers (each separated by one nonlinearity, except layer4.2.relu, avgpool, and fc, which are connected by a linear layer):
     layer_names = [
         "relu",
         "layer1.0.relu",
@@ -160,8 +126,9 @@ class ResNet50(_PretrainedNN):
         return image_loader, model
 
 
-# %%
 class ConvNeXtB(_PretrainedNN):
+    """ConvNeXt-B encoder with named layer outputs."""
+
     layer_names = [
         "features.0",
         "features.1",
@@ -182,39 +149,3 @@ class ConvNeXtB(_PretrainedNN):
             weights=torchvision.models.ConvNeXt_Base_Weights.IMAGENET1K_V1
         )
         return image_loader, model
-
-
-class CLIPResNet50(_PretrainedNN):
-    """CLIP RN50 visual encoder with named layer outputs."""
-
-    # A subset of layers (each separated by one nonlinearity, except
-    # layer4.2.relu3 and attnpool, which are connected by attention pooling).
-    layer_names = [
-        "relu3",
-        "layer1.0.relu3",
-        "layer1.1.relu3",
-        "layer1.2.relu3",
-        "layer2.0.relu3",
-        "layer2.1.relu3",
-        "layer2.2.relu3",
-        "layer2.3.relu3",
-        "layer3.0.relu3",
-        "layer3.1.relu3",
-        "layer3.2.relu3",
-        "layer3.3.relu3",
-        "layer3.4.relu3",
-        "layer3.5.relu3",
-        "layer4.0.relu3",
-        "layer4.1.relu3",
-        "layer4.2.relu3",
-        "attnpool",
-    ]
-
-    def _load_modules(self):
-        """Load the CLIP RN50 image loader and visual model."""
-        import clip
-
-        model, image_loader = clip.load("RN50", device="cpu")
-        # The image_loader already performs the resizing and center-cropping without unnecessarily removing any content from the shorter dimension (i.e. resize 224, then center crops 224).
-        # It also has slightly different channel normalization constants so we can use it directly.
-        return image_loader, model.visual

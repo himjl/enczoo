@@ -5,8 +5,7 @@ import numpy as np
 import torch
 import torchvision
 
-from enczoo.base import DeviceType
-from enczoo.torch_base import TorchImageEncoding
+from enczoo.base import DeviceType, TorchImageEncoding
 
 
 class ImageNeuralNetwork(TorchImageEncoding, ABC):
@@ -34,69 +33,56 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         """
         super().__init__(device=device, device_index=device_index)
 
-        # Ensure modules will be registered in evaluation mode
         if isinstance(image_loader, torch.nn.Module):
             image_loader.train(mode=False)
         model.train(mode=False)
 
-        self._layer_name = layer_name  # Needed for the forward pass
+        self._layer_name = layer_name
 
         def register_hook(
             module: torch.nn.Module,
             root_name: str,
             activations_dict: dict[str, torch.Tensor],
         ) -> list[str]:
-            """Recursively register forward hooks on named modules.
-
-            Args:
-                module: Module whose children are walked.
-                root_name: Prefix for module names.
-                activations_dict: Dict populated with layer activations.
-
-            Returns:
-                A list of layer names in discovery order.
-            """
+            """Recursively register forward hooks on named modules."""
             module_names = []
 
             if root_name != "":
-                layer_name = root_name
+                discovered_layer_name = root_name
 
-                if layer_name in activations_dict:
+                if discovered_layer_name in activations_dict:
                     raise Exception(
-                        f"Layer name {layer_name} already exists in hidden activations! Existing keys: {self._hidden_activations.keys()}"
+                        f"Layer name {discovered_layer_name} already exists in hidden activations! Existing keys: {self._hidden_activations.keys()}"
                     )
 
                 def hook_function(module: torch.nn.Module, args, output):
-                    activations_dict[layer_name] = output
+                    del module, args
+                    activations_dict[discovered_layer_name] = output
 
                 module.register_forward_hook(hook_function)
-                module_names.append(layer_name)
+                module_names.append(discovered_layer_name)
 
             for module_name, submodule in module.named_children():
-                if module_name != "":
-                    next_root_name = (
-                        root_name + "." + module_name
-                        if root_name != ""
-                        else module_name
-                    )
-                else:
+                if module_name == "":
                     raise ValueError("Empty module name found in model!")
-                # Ensure module is in evaluation mode
-                submodule.train(mode=False)
-                # Recursive call:
-                submodule_names = register_hook(
-                    submodule,
-                    root_name=next_root_name,
-                    activations_dict=activations_dict,
+                next_root_name = (
+                    root_name + "." + module_name if root_name != "" else module_name
                 )
-
-                module_names.extend(submodule_names)
+                submodule.train(mode=False)
+                module_names.extend(
+                    register_hook(
+                        submodule,
+                        root_name=next_root_name,
+                        activations_dict=activations_dict,
+                    )
+                )
             return module_names
 
-        # Register forward hooks that will populate this dictionary with hidden activations on the forward pass:
         self._hidden_activations: dict[str, torch.Tensor] = {}
         self._layer_names = register_hook(
-            model, root_name="", activations_dict=self._hidden_activations
+            model,
+            root_name="",
+            activations_dict=self._hidden_activations,
         )
 
         if layer_name not in self._layer_names:
@@ -104,7 +90,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
                 f"Layer name {layer_name} not found in model.\nAvailable layer names: {'\n'.join(self._layer_names)}"
             )
 
-        # Populate the sizes of the layers with a forward pass
         with torch.no_grad():
             test_image = PIL.Image.fromarray(np.zeros((224, 224, 3), dtype=np.uint8))
             test_image = image_loader(test_image)
@@ -115,7 +100,6 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
             for layer in self._hidden_activations
         }
 
-        # Register modules
         self.image_loader = image_loader
         self.model = model.to(self.torch_device)
 
@@ -124,32 +108,16 @@ class ImageNeuralNetwork(TorchImageEncoding, ABC):
         images: list[PIL.Image.Image],
         seed: int | None = None,
     ) -> torch.Tensor:
-        """Convert images to network activations.
-
-        Args:
-            images: A list of PIL.Image.Image.
-            seed: Unused backend seed forwarded for API consistency.
-
-        Returns:
-            A torch.Tensor of shape [B, *].
-        """
+        """Convert images to network activations."""
         del seed
 
-        # Preprocess the images
         preprocessed_images = torch.stack(
-            [self.image_loader(image) for image in images], dim=0
+            [self.image_loader(image) for image in images],
+            dim=0,
         )
-
-        # Transfer to the correct device
         preprocessed_images = preprocessed_images.to(self.torch_device)
-
-        # Run the forward pass
         self.model(preprocessed_images)
-
-        # Retrieve the activations for the given layer
-        f = self._hidden_activations[self._layer_name]
-
-        return f
+        return self._hidden_activations[self._layer_name]
 
     @property
     def layer_name_to_shape(self) -> dict[str, tuple[int, ...]]:

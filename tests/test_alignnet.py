@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 
-from enczoo.alignnet.alignnet import AligNetViTB16, UnaligNetViTB16
+from enczoo.encoders.alignnet import AligNetViTB16, UnaligNetViTB16
 
 
 class _BytesResponse(io.BytesIO):

@@ -12,11 +12,9 @@ from typing import Any
 
 import PIL.Image
 import numpy as np
-
 from tqdm import tqdm
 
-from enczoo.base import DeviceType
-from enczoo.tensorflow_base import TensorflowImageEncoding
+from enczoo.base import DeviceType, TensorFlowImageEncoding
 
 _CACHE_ENV_VAR = "ENCZOO_CACHE_DIR"
 _DOWNLOAD_CHUNK_SIZE = 1024 * 1024
@@ -39,7 +37,7 @@ def _default_cache_dir() -> Path:
     return Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "enczoo"
 
 
-class _AlignNet(TensorflowImageEncoding, ABC):
+class _AlignNet(TensorFlowImageEncoding, ABC):
     """TensorFlow SavedModel-backed AlignNet encoder."""
 
     model_name: str
@@ -196,12 +194,7 @@ class _AlignNet(TensorflowImageEncoding, ABC):
 
     @staticmethod
     def _preprocess_image(image: PIL.Image.Image) -> np.ndarray:
-        """Convert a PIL image to a float32 BHWC-ready tensor.
-
-        enczoo preserves the largest centered square crop by resizing the
-        shorter side to 224 and then center-cropping to 224x224 before scaling
-        values to [0, 1].
-        """
+        """Convert a PIL image to a float32 BHWC-ready tensor."""
         image = image.convert("RGB")
         width, height = image.size
         scale = _MODEL_INPUT_SIZE / min(width, height)
@@ -224,26 +217,14 @@ class _AlignNet(TensorflowImageEncoding, ABC):
 
 
 class AligNetViTB16(_AlignNet):
-    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from AlignNet (a teacher network tuned against human triplet judgments).
-
-    Reference:
-        Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
-        human visual representations across abstraction levels." Nature 647,
-        349-355 (2025). https://doi.org/10.1038/s41586-025-09631-6
-    """
+    """AlignNet-aligned ViT-B/16 encoder."""
 
     model_name = "ViT-B-alignet"
     weights_url = "https://storage.googleapis.com/alignet/models/ViT-B-alignet.tar.gz"
 
 
 class UnaligNetViTB16(_AlignNet):
-    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from UnalignNet (which was _not_ tuned on human triplet judgments).
-
-    Reference:
-        Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
-        human visual representations across abstraction levels." Nature 647,
-        349-355 (2025). https://doi.org/10.1038/s41586-025-09631-6
-    """
+    """Unaligned ViT-B/16 encoder from the AlignNet release."""
 
     model_name = "ViT-B-untransformed"
     weights_url = (
