@@ -211,14 +211,25 @@ class _AlignNet(TensorflowImageEncoding, ABC):
 
 
 class AligNetViTB16(_AlignNet):
-    """AlignNet-aligned ViT-B/16 encoder."""
+    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from AlignNet (which was tuned on human triplet judgments).
+     Reference:
+        Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
+        human visual representations across abstraction levels." Nature 647,
+        349-355 (2025). https://doi.org/10.1038/s41586-025-09631-6
+     """
 
     model_name = "ViT-B-alignet"
     weights_url = "https://storage.googleapis.com/alignet/models/ViT-B-alignet.tar.gz"
 
 
 class UnaligNetViTB16(_AlignNet):
-    """Unaligned ViT-B/16 encoder from the AlignNet release."""
+    """ViT-B/16 which has been pretrained on ImageNet, then aligned against triplet judgments generated from UnalignNet (which was _not_ tuned on human triplet judgments).
+
+    Reference:
+        Muttenthaler, L., Greff, K., Born, F. et al. "Aligning machine and
+        human visual representations across abstraction levels." Nature 647,
+        349-355 (2025). https://doi.org/10.1038/s41586-025-09631-6
+    """
 
     model_name = "ViT-B-untransformed"
     weights_url = (
